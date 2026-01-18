@@ -1,0 +1,22 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    dotenv (2.8.1)
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
+    json (2.7.6)
+    mini_mime (1.1.5)
+    multi_xml (0.6.0)
+
+PLATFORMS
+  ruby
+  x86_64-darwin-20
+
+DEPENDENCIES
+  dotenv
+  httparty
+  json
+
+BUNDLED WITH
+   2.2.0

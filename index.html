@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f0f0f">
+  <meta charset="UTF-8" />
+  <title>Responsive Angular Snake (Auto)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 32px;
+      background: #0f0f0f;
+      font-family: system-ui, sans-serif;
+      color: #fff;
+    }
+
+    .path {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .row {
+      display: flex;
+      width: 100%;
+    }
+
+    .row.forward {
+      flex-direction: row;
+    }
+
+    .row.backward {
+      flex-direction: row-reverse;
+    }
+
+    .row.turn-right {
+      justify-content: flex-end;
+    }
+
+    .row.turn-left {
+      justify-content: flex-start;
+    }
+
+    .cell {
+      flex: 0 0 10%;
+      padding: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 999px;
+      padding: 10px 0;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2a2a2a;
+    }
+
+    @media (max-width: 600px) {
+      button {
+        font-size: 12px;
+        padding: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="path" id="path"></div>
+
+<script>
+  const path = document.getElementById("path");
+
+  const MAX_LEVELS = 1000;
+  const ROW_SIZE = 10;
+  const TURN_ROWS = 2;
+
+  let level = 1;
+  let direction = "forward"; // forward | backward
+
+  function createRow(type, count) {
+    const row = document.createElement("div");
+    row.className = `row ${type}`;
+
+    for (let i = 0; i < count; i++) {
+      if (level > MAX_LEVELS) break;
+
+      const cell = document.createElement("div");
+      cell.className = "cell";
+
+      const btn = document.createElement("button");
+      btn.textContent = level++;
+
+      cell.appendChild(btn);
+      row.appendChild(cell);
+    }
+
+    path.appendChild(row);
+  }
+
+  while (level <= MAX_LEVELS) {
+    // основной горизонтальный ход
+    createRow(direction, ROW_SIZE);
+
+    if (level > MAX_LEVELS) break;
+
+    // вертикальный "поворот"
+    const turnClass = direction === "forward" ? "turn-right" : "turn-left";
+    for (let i = 0; i < TURN_ROWS; i++) {
+      if (level > MAX_LEVELS) break;
+      createRow(turnClass, 1);
+    }
+
+    // меняем направление
+    direction = direction === "forward" ? "backward" : "forward";
+  }
+
+  function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "zh-CN";
+    utterance.rate = 0.85; // чуть медленнее — идеально для обучения
+    utterance.pitch = 1.0;
+
+    const voices = speechSynthesis.getVoices();
+    const zhVoice = voices.find(v => v.lang.startsWith("zh"));
+    if (zhVoice) utterance.voice = zhVoice;
+
+    speechSynthesis.speak(utterance);
+  }
+</script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+</script>
+</body>
+</html>
