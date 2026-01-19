@@ -5,7 +5,7 @@ const CHARS_PER_LEVEL = 3;
 let HSK = [];
 
 async function loadHSK() {
-  const res = await fetch("/data/hsk1.json");
+  const res = await fetch("./data/hsk1.json");
   HSK = await res.json();
 }
 
