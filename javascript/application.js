@@ -330,7 +330,7 @@ function renderLevel(level, index = 0) {
           ? `<button class="next-btn" onclick="location.hash='#/level/${level}/${index + 1}'">→</button>`
           : `<button class="next-btn" onclick="finishLevel(${level})">✓</button>`
       }
-      <button class="speak-btn" onclick="speak('${c.hanzi}')">🔊</button>
+      <button class="speak-btn" onclick="speak2('${c.hanzi}')">🔊</button>
     </div>
 
     <h1>Level ${level}</h1>
@@ -338,7 +338,7 @@ function renderLevel(level, index = 0) {
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi">${c.hanzi}</div>
-      <button id="toggle-meaning" class="secondary-btn">Show meaning</button>
+      <button id="toggle-meaning" class="secondary-btn">Open</button>
       <div id="meaning" style="display:none">
         <div class="pinyin-row">
           <span class="pinyin">${c.pinyin}</span>
@@ -346,16 +346,18 @@ function renderLevel(level, index = 0) {
 
         <div class="section">Перевод: ${c.ru_translations.join(", ")}</div>
         <div class="section">Translation: ${c.translations.join(", ")}</div>
-        <div class="section">Homonyms: ${c.homonyms}</div>
 
-        <h1>Description</h1>
-        <div class="section">${c.description || ""}</div>
+        <h1>Deepseek</h1>
+        <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
+        <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
+        <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
+        <p class="section">${c.deepseek_description_paragraph_4 || ""}</p>
 
-        <h1>Philosophy</h1>
-        <div class="section">${c.philosophy || ""}</div>
-
-        <h1>Usage Examples</h1>
-        <div class="section">${c.usage_example || ""}</div>
+        <h1>ChatGPT</h1>
+        <p class="section">${c.chatgpt_description_paragraph_1 || ""}</p>
+        <p class="section">${c.chatgpt_description_paragraph_2 || ""}</p>
+        <p class="section">${c.chatgpt_description_paragraph_3 || ""}</p>
+        <p class="section">${c.chatgpt_description_paragraph_4 || ""}</p>
       </div>
     </div>
   `;
@@ -411,7 +413,7 @@ function renderSrs() {
       <button class="next-srs-btn"  onclick="nextSrs()">
         ${isLast ? "✓" : "→"}
       </button>
-      <button class="speak-btn" onclick="speak('${c.hanzi}')">🔊</button>
+      <button class="speak-btn" onclick="speak2('${c.hanzi}')">🔊</button>
     </div>
 
     <h1>SRS</h1>
@@ -419,7 +421,7 @@ function renderSrs() {
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi">${c.hanzi}</div>
-      <button id="toggle-meaning" class="secondary-btn">Show meaning</button>
+      <button id="toggle-meaning" class="secondary-btn">Open</button>
       <div id="meaning" style="display:none">
         <div class="pinyin-row">
           <span class="pinyin">${c.pinyin}</span>
@@ -427,16 +429,12 @@ function renderSrs() {
 
         <div class="section">Перевод: ${c.ru_translations.join(", ")}</div>
         <div class="section">Translation: ${c.translations.join(", ")}</div>
-        <div class="section">Homonyms: ${c.homonyms}</div>
 
-        <h1>Description</h1>
-        <div class="section">${c.description || ""}</div>
-
-        <h1>Philosophy</h1>
-        <div class="section">${c.philosophy || ""}</div>
-
-        <h1>Usage Examples</h1>
-        <div class="section">${c.usage_example || ""}</div>
+        <h1>Deepseek</h1>
+        <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
+        <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
+        <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
+        <p class="section">${c.deepseek_description_paragraph_4 || ""}</p>
       </div>
     </div>
   `;
@@ -527,6 +525,69 @@ function isIgnoredFromSrs(hanzi) {
   const progress = getProgress();
   return !!progress.ignoredFromSrs?.[hanzi];
 }
+function handleSwipe() {
+  const diff = touchEndX - touchStartX;
+  if (Math.abs(diff) < 50) return;
+
+  const hash = location.hash;
+
+  // ---------- LEVEL ----------
+  if (hash.startsWith("#/level/")) {
+    const match = hash.match(/^#\/level\/(\d+)(?:\/(\d+))?/);
+    if (!match) return;
+
+    const level = parseInt(match[1], 10);
+    const index = parseInt(match[2] || "0", 10);
+    const charsCount = getCharsForLevel(level).length;
+
+    // swipe left → next char / finish level
+    if (diff < 0) {
+      if (index < charsCount - 1) {
+        location.hash = `#/level/${level}/${index + 1}`;
+      } else {
+        finishLevel(level);
+      }
+    }
+
+    // swipe right → prev char / back to main
+    if (diff > 0) {
+      if (index > 0) {
+        location.hash = `#/level/${level}/${index - 1}`;
+      } else {
+        location.hash = "#";
+      }
+    }
+    return;
+  }
+
+  // ---------- SRS ----------
+  if (hash === "#/srs") {
+    // swipe left → next SRS card
+    if (diff < 0) {
+      nextSrs();
+    }
+
+    // swipe right → exit SRS
+    if (diff > 0) {
+      location.hash = "#";
+      window.location.reload();
+    }
+
+    return;
+  }
+}
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener("touchstart", e => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener("touchend", e => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
 
 
 (async function init() {
