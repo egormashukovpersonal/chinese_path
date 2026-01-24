@@ -1,12 +1,19 @@
 const LEVELS_PER_ROW = 5;
-const TURN_LENGTH = 1;
-const CHARS_PER_LEVEL = 3;
+const TURN_LENGTH = 0;
+const CHARS_PER_LEVEL = 4;
 
 let HSK = [];
 
 async function loadHSK() {
-  const res = await fetch("./data/hsk1.json");
-  HSK = await res.json();
+  const [res1, res2] = await Promise.all([
+    fetch("./data/hsk1.json"),
+    fetch("./data/hsk2.json")
+  ]);
+
+  const hsk1 = await res1.json();
+  const hsk2 = await res2.json();
+
+  HSK = [...hsk1, ...hsk2];
 }
 
 
@@ -121,9 +128,20 @@ function selectSrsSize(value) {
   document.getElementById("srs-size-menu").style.display = "none";
 }
 
+function isLevelEmpty(level) {
+  return getHanziPreviewForLevel(level).length === 0;
+}
+
 function renderPath() {
   const maxId = Math.max(...HSK.map(c => c.id));
   const totalLevels = Math.ceil(maxId / CHARS_PER_LEVEL);
+
+  const visibleLevels = [];
+  for (let lvl = 1; lvl <= totalLevels; lvl++) {
+    if (!isLevelEmpty(lvl)) {
+      visibleLevels.push(lvl);
+    }
+  }
 
   app.innerHTML = `
     <div class="fixed-bottom">
@@ -148,8 +166,10 @@ function renderPath() {
     <div id="srs-size-menu" class="srs-size-menu" style="display:none">
       <button class="select-srs-size-btn" onclick="selectSrsSize(5)">5</button>
       <button class="select-srs-size-btn" onclick="selectSrsSize(10)">10</button>
+      <button class="select-srs-size-btn" onclick="selectSrsSize(15)">15</button>
       <button class="select-srs-size-btn" onclick="selectSrsSize(25)">25</button>
       <button class="select-srs-size-btn" onclick="selectSrsSize(50)">50</button>
+      <button class="srs-reset-ignored" onclick="resetIgnoredSrs()">Reset ignored</button>
     </div>
 
 
@@ -157,24 +177,106 @@ function renderPath() {
   `;
   const path = document.getElementById("path");
 
-  let level = 1;
+  let index = 0;
   let direction = "forward";
 
-  while (level <= totalLevels) {
-    const rowStart = level;
-    const rowEnd = Math.min(level + LEVELS_PER_ROW - 1, totalLevels);
+  while (index < visibleLevels.length) {
+    const rowLevels = visibleLevels.slice(
+      index,
+      index + LEVELS_PER_ROW
+    );
 
-    createRow(path, direction, rowStart, rowEnd);
-    level = rowEnd + 1;
+    createRowFromLevels(path, direction, rowLevels);
+    index += rowLevels.length;
 
-    if (level > totalLevels) break;
+    if (index >= visibleLevels.length) break;
 
-    createTurn(path, direction, level);
-    level += TURN_LENGTH;
+    if (TURN_LENGTH > 0) {
+      const turnLevels = visibleLevels.slice(index, index + TURN_LENGTH);
+      createTurnFromLevels(path, direction, turnLevels);
+      index += turnLevels.length;
+    }
 
     direction = direction === "forward" ? "backward" : "forward";
   }
 }
+
+function resetIgnoredSrs() {
+  const progress = getProgress();
+
+  if (progress.ignoredFromSrs) {
+    delete progress.ignoredFromSrs;
+    saveProgress(progress);
+  }
+  document.getElementById("srs-size-menu").style.display = "none";
+
+  location.hash = "#";
+  window.location.reload();
+}
+
+function createRowFromLevels(container, direction, levels) {
+  const row = document.createElement("div");
+  row.className = "row";
+
+  const orderedLevels =
+    direction === "forward"
+      ? levels
+      : [...levels].reverse();
+
+  const count = orderedLevels.length;
+
+  orderedLevels.forEach((lvl, index) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    const btn = document.createElement("button");
+
+    const levelNum = document.createElement("div");
+    levelNum.className = "level-number";
+    levelNum.textContent = lvl;
+    btn.appendChild(levelNum);
+
+    if (isLevelCompleted(lvl)) {
+      const hanzi = document.createElement("div");
+      hanzi.className = "level-hanzi";
+      hanzi.textContent = getHanziPreviewForLevel(lvl);
+      btn.appendChild(hanzi);
+    }
+
+    // 🔹 zigzag offset (same logic, just array-based)
+    if (direction !== "forward") {
+      const step = 20;
+      const offset =
+        direction === "forward"
+          ? index * step
+          : (count - 1 - index) * step;
+
+      btn.style.marginTop = `${offset}px`;
+    }
+
+    if (isLevelCompleted(lvl)) {
+      btn.classList.add("completed");
+    }
+
+    const nextAvailable = getNextAvailableLevel();
+
+    if (lvl > nextAvailable) {
+      btn.classList.add("locked");
+      btn.disabled = true;
+    } else {
+      btn.onclick = () => {
+        location.hash = `/level/${lvl}`;
+        window.location.reload();
+      };
+    }
+
+    cell.appendChild(btn);
+    row.appendChild(cell);
+  });
+
+  container.appendChild(row);
+}
+
 
 function createRow(container, direction, start, end) {
   const row = document.createElement("div");
@@ -185,12 +287,36 @@ function createRow(container, direction, start, end) {
       ? range(start, end)
       : range(start, end).reverse();
 
-  levels.forEach(lvl => {
+  const count = levels.length;
+
+  levels.forEach((lvl, index) => {
     const cell = document.createElement("div");
     cell.className = "cell";
 
     const btn = document.createElement("button");
-    btn.textContent = lvl;
+
+    const levelNum = document.createElement("div");
+    levelNum.className = "level-number";
+    levelNum.textContent = lvl;
+    btn.appendChild(levelNum);
+
+    if (isLevelCompleted(lvl)) {
+      const hanzi = document.createElement("div");
+      hanzi.className = "level-hanzi";
+      hanzi.textContent = getHanziPreviewForLevel(lvl);
+      btn.appendChild(hanzi);
+    }
+
+    if (direction != "forward"){
+      const step = 20;
+      const offset =
+        direction === "forward"
+          ? index * step
+          : (count - 1 - index) * step;
+
+      btn.style.marginTop = `${offset}px`;
+    }
+
     if (isLevelCompleted(lvl)) {
       btn.classList.add("completed");
     }
@@ -264,7 +390,19 @@ function createTurn(container, direction, startLevel) {
 
     const btn = document.createElement("button");
     btn.className = "secondary";
-    btn.textContent = lvl;
+
+    const levelNum = document.createElement("div");
+    levelNum.className = "level-number";
+    levelNum.textContent = lvl;
+
+    const hanzi = document.createElement("div");
+    hanzi.className = "level-hanzi";
+    hanzi.textContent = getHanziPreviewForLevel(lvl);
+
+    btn.appendChild(levelNum);
+    btn.appendChild(hanzi);
+
+
     if (isLevelCompleted(lvl)) {
       btn.classList.add("completed");
     }
@@ -294,6 +432,13 @@ function range(a, b) {
   const res = [];
   for (let i = a; i <= b; i++) res.push(i);
   return res;
+}
+
+function getHanziPreviewForLevel(level) {
+  return getCharsForLevel(level)
+    .filter(c => !isIgnoredFromSrs(c.hanzi))
+    .map(c => c.hanzi)
+    .join("");
 }
 
 function getCharsForLevel(level) {
@@ -344,8 +489,8 @@ function renderLevel(level, index = 0) {
           <span class="pinyin">${c.pinyin}</span>
         </div>
 
-        <div class="section">Перевод: ${c.ru_translations.join(", ")}</div>
-        <div class="section">Translation: ${c.translations.join(", ")}</div>
+        <div class="section">Перевод: ${c.ru_translations.slice(0, 3).join(", ")}</div>
+        <div class="section">Translation: ${c.translations.slice(0, 3).join(", ")}</div>
 
         <h1>Deepseek</h1>
         <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
@@ -427,8 +572,8 @@ function renderSrs() {
           <span class="pinyin">${c.pinyin}</span>
         </div>
 
-        <div class="section">Перевод: ${c.ru_translations.join(", ")}</div>
-        <div class="section">Translation: ${c.translations.join(", ")}</div>
+        <div class="section">Перевод: ${c.ru_translations.slice(0, 3).join(", ")}</div>
+        <div class="section">Translation: ${c.translations.slice(0, 3).join(", ")}</div>
 
         <h1>Deepseek</h1>
         <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>

@@ -29,6 +29,7 @@ body {
   flex-direction: column;
   gap: 24px;
   width: 100%;
+  padding-bottom: 500px;
 }
 
 .row {
@@ -54,8 +55,14 @@ body {
 
 .cell {
   flex: 0 0 20%;
-  padding: 4px;
+  padding: 0 4px;
   box-sizing: border-box;
+}
+
+.cell button {
+  min-height: 185px;
+  border-radius: 20%;
+  height: auto;
 }
 
 button {
@@ -194,12 +201,17 @@ button.locked {
   border: none;
 }
 .select-srs-size-btn {
-  width: 20%;
+  width: 18%;
 }
 .restore-rom-input-btn {
   width: 20%;
 }
 
+.srs-reset-ignored {
+  width: 50%;
+  font-size: 50px;
+  margin-top: 30px;
+}
 #restore-panel {
   margin-bottom: 40px;
   display: flex;
@@ -207,7 +219,7 @@ button.locked {
 }
 #restore-panel input {
   flex: 1;
-  font-size: 36px;
+  font-size: 60px;
 }
 
 .srs-size-menu {
@@ -233,4 +245,20 @@ h1 {
 
 #meaning {
   padding-bottom: 400px;
+}
+
+.level-number {
+  font-size: 70px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+button.completed .level-number{
+  display: none;
+}
+
+.level-hanzi {
+  font-size: 50px;
+  margin-top: 0px;
+  padding: 0 3px;
 }

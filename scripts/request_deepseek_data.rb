@@ -4,7 +4,7 @@ require "dotenv/load"
 
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_MODEL = "deepseek-chat"
-DATA_FILE = "data/hsk1.json"
+DATA_FILE = "data/hsk2.json"
 
 def generate_for_deepseek(char_data)
   prompt = <<~PROMPT
@@ -14,6 +14,11 @@ def generate_for_deepseek(char_data)
     Пиньинь: #{char_data["pinyin"]}
 
     В ответе сгенерируй СТРОГО JSON со следующими ключами:
+
+    ru_translations:
+    - массив из 1–2 кратких переводов на русском
+    - если возможно — один перевод
+    - не дублируй синонимы
 
     deepseek_description_paragraph_1:
     - общее понятное объяснение иероглифа
