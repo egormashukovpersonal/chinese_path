@@ -2,6 +2,16 @@ const LEVELS_PER_ROW = 5;
 const TURN_LENGTH = 0;
 const CHARS_PER_LEVEL = 4;
 
+
+(function initPreviewSettings() {
+  if (localStorage.getItem("useLineBreak") === null) {
+    localStorage.setItem("useLineBreak", "false");
+  }
+  if (localStorage.getItem("usePinyin") === null) {
+    localStorage.setItem("usePinyin", "false");
+  }
+})();
+
 let HSK = [];
 
 async function loadHSK() {
@@ -122,8 +132,7 @@ function toggleSrsSize() {
 function selectSrsSize(value) {
   setSrsLimit(value);
 
-  document.getElementById("srs-size-btn").textContent =
-    `SRS: ${value}`;
+  document.getElementById("srs-size-btn").textContent = `${value}`;
 
   document.getElementById("srs-size-menu").style.display = "none";
 }
@@ -146,9 +155,11 @@ function renderPath() {
   app.innerHTML = `
     <div class="fixed-bottom">
       <button id='srs-btn' onclick='startSrsSession()'>SRS</button>
-      <button class="stats-toggle" onclick="toggleSrsCalendar()">📊</button>
-      <button class="dev-toggle" onclick="toggleRestore()">⚙️</button>
-      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">SRS: ${getSrsLimit()}</button>
+      <button class="stats-toggle" onclick="toggleSrsCalendar()">▦</button>
+      <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
+      <button class="line-break-toggle" onclick="toggleLineBreak()">↵</button>
+      <button class="pinyin-toggle" onclick="togglePinyin()">Aa</button>
+      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getSrsLimit()}</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
@@ -239,7 +250,7 @@ function createRowFromLevels(container, direction, levels) {
     if (isLevelCompleted(lvl)) {
       const hanzi = document.createElement("div");
       hanzi.className = "level-hanzi";
-      hanzi.textContent = getHanziPreviewForLevel(lvl);
+      hanzi.innerHTML = getHanziPreviewForLevel(lvl);
       btn.appendChild(hanzi);
     }
 
@@ -303,7 +314,7 @@ function createRow(container, direction, start, end) {
     if (isLevelCompleted(lvl)) {
       const hanzi = document.createElement("div");
       hanzi.className = "level-hanzi";
-      hanzi.textContent = getHanziPreviewForLevel(lvl);
+      hanzi.innerHTML = getHanziPreviewForLevel(lvl);
       btn.appendChild(hanzi);
     }
 
@@ -434,11 +445,42 @@ function range(a, b) {
   return res;
 }
 
+function toggleLineBreak() {
+  const current = localStorage.getItem("useLineBreak") !== "false";
+
+  const next = !current;
+  localStorage.setItem("useLineBreak", String(next));
+
+  renderPath();
+}
+
+function togglePinyin() {
+  const current = localStorage.getItem("usePinyin") !== "false";
+
+  const next = !current;
+  localStorage.setItem("usePinyin", String(next));
+
+  renderPath();
+}
+
 function getHanziPreviewForLevel(level) {
-  return getCharsForLevel(level)
-    .filter(c => !isIgnoredFromSrs(c.hanzi))
-    .map(c => c.hanzi)
-    .join("");
+  let useLineBreak = localStorage.getItem("useLineBreak") !== "false";
+  let usePinyin = localStorage.getItem("usePinyin") !== "false";
+  const sep = useLineBreak ? "<br>" : " ";
+
+  let filtered = getCharsForLevel(level).filter(c => !isIgnoredFromSrs(c.hanzi))
+
+
+  return filtered.map((c, i) =>
+      usePinyin
+        ? `<div>
+             <div>${c.hanzi}</div>
+             <div>${c.pinyin}</div>
+             ${i < filtered.length - 1 ? '<hr>' : ''}
+           </div>`
+        : `${c.hanzi}`
+    )
+    .join(sep);
 }
 
 function getCharsForLevel(level) {
@@ -661,7 +703,7 @@ function renderSrsMonth() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay() || 7;
 
-  let html = `<div class="calendar-grid">`;
+  let html = `<h1>SRS Calendar</h1><div class="calendar-grid">`;
 
   // пустые ячейки перед началом месяца
   for (let i = 1; i < firstDay; i++) {
