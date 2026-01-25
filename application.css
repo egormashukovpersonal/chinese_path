@@ -144,6 +144,11 @@ button:hover {
   margin-right: 2%;
   background: #303030 !important;
 }
+.google-btn {
+  width: 20%;
+  position: absolute;
+  right: 20px;
+}
 
 button.completed {
   background: #2ecc71;

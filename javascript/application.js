@@ -487,6 +487,7 @@ function renderLevel(level, index = 0) {
       <div id="meaning" style="display:none">
         <div class="pinyin-row">
           <span class="pinyin">${c.pinyin}</span>
+          <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🌐</button>
         </div>
 
         <div class="section">Перевод: ${c.ru_translations.slice(0, 3).join(", ")}</div>
@@ -533,6 +534,11 @@ function ignoreCurrentSrsChar() {
   }
 }
 
+function googleHanzi(hanzi) {
+  const query = encodeURIComponent(`${hanzi}`);
+  const url = `https://www.google.com/search?tbm=isch&q=${query}`;
+  window.open(url, "_blank");
+}
 
 function renderSrs() {
   const session = JSON.parse(localStorage.getItem("srsSession"));
@@ -570,6 +576,7 @@ function renderSrs() {
       <div id="meaning" style="display:none">
         <div class="pinyin-row">
           <span class="pinyin">${c.pinyin}</span>
+          <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🌐</button>
         </div>
 
         <div class="section">Перевод: ${c.ru_translations.slice(0, 3).join(", ")}</div>
