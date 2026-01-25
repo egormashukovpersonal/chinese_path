@@ -1,3 +1,9 @@
+html {
+  font-size: 100%; /* ← уважает системный размер */
+  -webkit-text-size-adjust: 100%; /* iOS */
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   padding: 32px;
