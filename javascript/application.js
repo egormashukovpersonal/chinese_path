@@ -535,10 +535,16 @@ function ignoreCurrentSrsChar() {
 }
 
 function googleHanzi(hanzi) {
-  const query = encodeURIComponent(`${hanzi}`);
+  const query = encodeURIComponent(hanzi);
   const url = `https://www.google.com/search?tbm=isch&q=${query}`;
-  window.open(url, "_blank");
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_system";
+  a.rel = "noopener";
+  a.click();
 }
+
 
 function renderSrs() {
   const session = JSON.parse(localStorage.getItem("srsSession"));
