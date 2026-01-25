@@ -126,7 +126,8 @@ button:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 40px;
+  margin-bottom: 50px;
 }
 
 .speak-btn {
@@ -138,10 +139,10 @@ button:hover {
   margin-right: 2%;
   background: #303030 !important;
 }
-.google-btn {
+.google-btn, .chatgpt-btn {
   width: 20%;
-  position: absolute;
-  right: 20px;
+  float: right;
+  margin-left: 20px;
 }
 
 button.completed {
@@ -249,7 +250,7 @@ h1 {
 }
 
 #meaning {
-  padding-bottom: 400px;
+  padding-bottom: 500px;
 }
 
 .level-number {

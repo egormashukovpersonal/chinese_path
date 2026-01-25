@@ -487,11 +487,11 @@ function renderLevel(level, index = 0) {
       <div id="meaning" style="display:none">
         <div class="pinyin-row">
           <span class="pinyin">${c.pinyin}</span>
-          <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🌐</button>
         </div>
 
-        <div class="section">Перевод: ${c.ru_translations.slice(0, 3).join(", ")}</div>
-        <div class="section">Translation: ${c.translations.slice(0, 3).join(", ")}</div>
+        <div class="section">
+          ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+        </div>
 
         <h1>Deepseek</h1>
         <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
@@ -499,11 +499,8 @@ function renderLevel(level, index = 0) {
         <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_4 || ""}</p>
 
-        <h1>ChatGPT</h1>
-        <p class="section">${c.chatgpt_description_paragraph_1 || ""}</p>
-        <p class="section">${c.chatgpt_description_paragraph_2 || ""}</p>
-        <p class="section">${c.chatgpt_description_paragraph_3 || ""}</p>
-        <p class="section">${c.chatgpt_description_paragraph_4 || ""}</p>
+        <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🧭</button>
+        <button class="chatgpt-btn" onclick="explainInChatGPT('${c.hanzi}')">💬</button>
       </div>
     </div>
   `;
@@ -514,6 +511,15 @@ function renderLevel(level, index = 0) {
     document.getElementById("meaning").style.display = "block";
   };
 }
+
+function explainInChatGPT(hanzi) {
+  const text = `объясни из каких черт и элементов состоит иероглиф ${hanzi}\n`;
+
+  navigator.share({
+    text
+  });
+}
+
 
 function ignoreCurrentSrsChar() {
   const session = JSON.parse(localStorage.getItem("srsSession"));
@@ -582,17 +588,20 @@ function renderSrs() {
       <div id="meaning" style="display:none">
         <div class="pinyin-row">
           <span class="pinyin">${c.pinyin}</span>
-          <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🌐</button>
         </div>
 
-        <div class="section">Перевод: ${c.ru_translations.slice(0, 3).join(", ")}</div>
-        <div class="section">Translation: ${c.translations.slice(0, 3).join(", ")}</div>
+        <div class="section">
+          ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+        </div>
 
         <h1>Deepseek</h1>
         <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_4 || ""}</p>
+
+        <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🧭</button>
+        <button class="chatgpt-btn" onclick="explainInChatGPT('${c.hanzi}')">💬</button>
       </div>
     </div>
   `;
