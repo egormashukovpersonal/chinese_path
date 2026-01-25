@@ -1,4 +1,4 @@
-const CACHE_NAME = "chinese-path-v1";
+const CACHE_NAME = "chinese-path-v1.0.1";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
