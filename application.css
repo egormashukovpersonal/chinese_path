@@ -103,6 +103,19 @@ button:hover {
 .section {
   font-size: 3.5rem;
 }
+.example-section {
+  margin-top: 60px;
+}
+.example-p {
+  margin: 0;
+}
+.example-p-hanzi {
+  font-size: 5.5rem;
+}
+
+.example-p-pinying {
+  font-size: 5rem;
+}
 
 .progress {
   opacity: 0.6;
@@ -129,8 +142,9 @@ button:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 40px;
+  margin-top: 0px;
   margin-bottom: 50px;
+  text-align: center;
 }
 
 .speak-btn {

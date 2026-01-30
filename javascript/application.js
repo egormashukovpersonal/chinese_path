@@ -158,7 +158,7 @@ function renderPath() {
       <button class="stats-toggle" onclick="toggleSrsCalendar()">▦</button>
       <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
       <button class="line-break-toggle" onclick="toggleLineBreak()">↵</button>
-      <button class="pinyin-toggle" onclick="togglePinyin()">Aa</button>
+      <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
       <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getSrsLimit()}</button>
     </div>
 
@@ -448,7 +448,11 @@ function range(a, b) {
 function toggleLineBreak() {
   const current = localStorage.getItem("useLineBreak") !== "false";
 
-  const next = !current;
+  let next = !current;
+
+  if (localStorage.getItem("usePinyin") !== "false") {
+    next = false
+  }
   localStorage.setItem("useLineBreak", String(next));
 
   renderPath();
@@ -459,6 +463,7 @@ function togglePinyin() {
 
   const next = !current;
   localStorage.setItem("usePinyin", String(next));
+  localStorage.setItem("useLineBreak", String(false));
 
   renderPath();
 }
@@ -525,14 +530,23 @@ function renderLevel(level, index = 0) {
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi">${c.hanzi}</div>
-      <button id="toggle-meaning" class="secondary-btn">Open</button>
-      <div id="meaning" style="display:none">
-        <div class="pinyin-row">
-          <span class="pinyin">${c.pinyin}</span>
-        </div>
+      <button id="toggle-meaning" class="secondary-btn">Pinying</button>
 
+      <div id="toggle-pinyin" style="display: none;">
+        <div class="pinyin-row">
+          <p class="pinyin">${c.pinyin}</span>
+        </div>
+      </div>
+
+      <div id="meaning" style="display:none">
         <div class="section">
           ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+        </div>
+
+        <div class="example-section">
+          <p class="section example-p example-p-hanzi">${c.example_hanzi}<button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button></span>
+          <p class="section example-p example-p-pinying">${c.example_pinying}</span>
+          <p class="section example-p example-p-ru">${c.example_ru}</span>
         </div>
 
         <h1>Deepseek</h1>
@@ -548,9 +562,22 @@ function renderLevel(level, index = 0) {
   `;
 
   const toggleBtn = document.getElementById("toggle-meaning");
+  const meaning = document.getElementById("meaning");
+  const pinyin = document.getElementById("toggle-pinyin");
+
+  let clicks = 0
+
   toggleBtn.onclick = () => {
-    toggleBtn.style.display = 'none'
-    document.getElementById("meaning").style.display = "block";
+    clicks++;
+
+    if (clicks == 1) {
+      pinyin.style.display = "block";
+      toggleBtn.textContent = "Open";
+    }
+    if (clicks == 2) {
+      toggleBtn.style.display = 'none'
+      meaning.style.display = "block";
+    };
   };
 }
 
@@ -626,14 +653,23 @@ function renderSrs() {
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi">${c.hanzi}</div>
-      <button id="toggle-meaning" class="secondary-btn">Open</button>
-      <div id="meaning" style="display:none">
-        <div class="pinyin-row">
-          <span class="pinyin">${c.pinyin}</span>
-        </div>
+      <button id="toggle-meaning" class="secondary-btn">Pinying</button>
 
+      <div id="toggle-pinyin" style="display: none;">
+        <div class="pinyin-row">
+          <p class="pinyin">${c.pinyin}</span>
+        </div>
+      </div>
+
+      <div id="meaning" style="display:none">
         <div class="section">
           ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+        </div>
+
+        <div class="example-section">
+          <p class="section example-p example-p-hanzi">${c.example_hanzi}<button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button></span>
+          <p class="section example-p example-p-pinying">${c.example_pinying}</span>
+          <p class="section example-p example-p-ru">${c.example_ru}</span>
         </div>
 
         <h1>Deepseek</h1>
@@ -649,10 +685,22 @@ function renderSrs() {
   `;
 
   const toggleBtn = document.getElementById("toggle-meaning");
-  toggleBtn.onclick = () => {
-    toggleBtn.style.display = 'none'
-    document.getElementById("meaning").style.display = "block";
+  const meaning = document.getElementById("meaning");
+  const pinyin = document.getElementById("toggle-pinyin");
 
+  let clicks = 0
+
+  toggleBtn.onclick = () => {
+    clicks++;
+
+    if (clicks == 1) {
+      pinyin.style.display = "block";
+      toggleBtn.textContent = "Open";
+    }
+    if (clicks == 2) {
+      toggleBtn.style.display = 'none'
+      meaning.style.display = "block";
+    };
   };
 }
 
