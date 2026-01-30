@@ -112,7 +112,13 @@ button:hover {
 .example-p-hanzi {
   font-size: 5.5rem;
 }
-
+.example-open-btn {
+  width: 20%;
+  float: right;
+  clear: right;
+  margin-right: 2%;
+  margin-top: 20px;
+}
 .example-p-pinying {
   font-size: 5rem;
 }
@@ -268,6 +274,7 @@ button.locked {
 }
 h1 {
   font-size: 100px;
+  clear: both;
 }
 .header-h2 {
   font-size: 40px;

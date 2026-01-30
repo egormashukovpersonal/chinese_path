@@ -544,9 +544,11 @@ function renderLevel(level, index = 0) {
         </div>
 
         <div class="example-section">
-          <p class="section example-p example-p-hanzi">${c.example_hanzi}<button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button></span>
-          <p class="section example-p example-p-pinying">${c.example_pinying}</span>
-          <p class="section example-p example-p-ru">${c.example_ru}</span>
+          <button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button>
+          <button class="example-open-btn" id="example-open-btn">↓</button>
+          <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
+          <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
+          <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
         </div>
 
         <h1>Deepseek</h1>
@@ -564,12 +566,9 @@ function renderLevel(level, index = 0) {
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
-
   let clicks = 0
-
   toggleBtn.onclick = () => {
     clicks++;
-
     if (clicks == 1) {
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
@@ -579,6 +578,22 @@ function renderLevel(level, index = 0) {
       meaning.style.display = "block";
     };
   };
+
+  const openExampleBtn = document.getElementById("example-open-btn");
+  const examplePinying = document.getElementById("example-p-pinying");
+  const exampleRu = document.getElementById("example-p-ru");
+  let exampleOpenClicks = 0
+  openExampleBtn.onclick = () => {
+    exampleOpenClicks++;
+    if (exampleOpenClicks == 1) {
+      examplePinying.style.display = "block";
+    }
+    if (exampleOpenClicks == 2) {
+      exampleRu.style.display = "block";
+      openExampleBtn.style.display = 'none'
+    };
+  };
+
 }
 
 function explainInChatGPT(hanzi) {
@@ -667,9 +682,11 @@ function renderSrs() {
         </div>
 
         <div class="example-section">
-          <p class="section example-p example-p-hanzi">${c.example_hanzi}<button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button></span>
-          <p class="section example-p example-p-pinying">${c.example_pinying}</span>
-          <p class="section example-p example-p-ru">${c.example_ru}</span>
+          <button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button>
+          <button class="example-open-btn" id="example-open-btn">↓</button>
+          <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
+          <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
+          <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
         </div>
 
         <h1>Deepseek</h1>
@@ -687,12 +704,9 @@ function renderSrs() {
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
-
   let clicks = 0
-
   toggleBtn.onclick = () => {
     clicks++;
-
     if (clicks == 1) {
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
@@ -702,6 +716,23 @@ function renderSrs() {
       meaning.style.display = "block";
     };
   };
+
+
+  const openExampleBtn = document.getElementById("example-open-btn");
+  const examplePinying = document.getElementById("example-p-pinying");
+  const exampleRu = document.getElementById("example-p-ru");
+  let exampleOpenClicks = 0
+  openExampleBtn.onclick = () => {
+    exampleOpenClicks++;
+    if (exampleOpenClicks == 1) {
+      examplePinying.style.display = "block";
+    }
+    if (exampleOpenClicks == 2) {
+      exampleRu.style.display = "block";
+      openExampleBtn.style.display = 'none'
+    };
+  };
+
 }
 
 function nextSrs() {
