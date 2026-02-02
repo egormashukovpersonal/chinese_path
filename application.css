@@ -252,6 +252,10 @@ button.locked {
   width: 20%;
   margin-left: 20px;
 }
+.ignore-rom-input-btn {
+  width: 20%;
+  margin-left: 20px;
+}
 
 .srs-reset-ignored {
   width: 50%;

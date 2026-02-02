@@ -97,12 +97,8 @@ function restoreFromInput() {
 }
 
 function restoreProgressToLevel(level) {
-  const progress = {
-    completedLevels: {},
-    srsHistory: {},
-    ignoredFromSrs: {},
-    settings: {}
-  };
+  const progress = getProgress();
+  progress.completedLevels ||= {};
 
   for (let i = 1; i < level; i++) {
     progress.completedLevels[i] = true;
@@ -165,13 +161,13 @@ function renderPath() {
     <div id="srs-calendar" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
-      <input
-        type="number"
-        id="restore-level"
-        placeholder="Start from level"
-        min="1"
-      />
+      <h1>Open levels til</h1>
+      <input type="number" id="restore-level" placeholder="Open levels til" min="1"/>
       <button class="restore-rom-input-btn" onclick="restoreFromInput()">Save</button>
+
+      <h1>Ignore levels til</h1>
+      <input type="number" id="ignore-level" placeholder="Ignore levels til" min="1"/>
+      <button class="ignore-rom-input-btn" onclick="ignoreSrsUntilLevel()">Save</button>
     </div>
 
     <div id="srs-size-menu" class="srs-size-menu" style="display:none">
@@ -211,6 +207,33 @@ function renderPath() {
     direction = direction === "forward" ? "backward" : "forward";
   }
 }
+
+function ignoreSrsUntilLevel() {
+  const level = parseInt(
+    document.getElementById("ignore-level")?.value,
+    10
+  )
+
+  if (!Number.isInteger(level) || level < 2) return
+
+  const progress = getProgress()
+
+  progress.ignoredFromSrs ||= {}
+  progress.completedLevels ||= {};
+
+  for (let i = 1; i < level; i++) {
+    progress.completedLevels[i] = true;
+
+    for (const char of getCharsForLevel(i)) {
+      progress.ignoredFromSrs[char.hanzi] = true
+    }
+  }
+
+  saveProgress(progress)
+  location.hash = "#";
+  window.location.reload();
+}
+
 
 function resetIgnoredSrs() {
   const progress = getProgress();
@@ -522,7 +545,7 @@ function renderLevel(level, index = 0) {
           ? `<button class="next-btn" onclick="location.hash='#/level/${level}/${index + 1}'">→</button>`
           : `<button class="next-btn" onclick="finishLevel(${level})">✓</button>`
       }
-      <button class="speak-btn" onclick="speak2('${c.hanzi}')">🔊</button>
+      <button class="speak-btn" onclick="speak('${c.hanzi}')">🔊</button>
     </div>
 
     <h1>Level ${level}</h1>
@@ -544,7 +567,7 @@ function renderLevel(level, index = 0) {
         </div>
 
         <div class="example-section">
-          <button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button>
+          <button class="speak-btn" onclick="speak('${c.example_hanzi}')">🔊</button>
           <button class="example-open-btn" id="example-open-btn">↓</button>
           <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
           <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
@@ -570,6 +593,7 @@ function renderLevel(level, index = 0) {
   toggleBtn.onclick = () => {
     clicks++;
     if (clicks == 1) {
+      speak(c.hanzi);
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
     }
@@ -660,7 +684,7 @@ function renderSrs() {
       <button class="next-srs-btn"  onclick="nextSrs()">
         ${isLast ? "✓" : "→"}
       </button>
-      <button class="speak-btn" onclick="speak2('${c.hanzi}')">🔊</button>
+      <button class="speak-btn" onclick="speak('${c.hanzi}')">🔊</button>
     </div>
 
     <h1>SRS</h1>
@@ -682,7 +706,7 @@ function renderSrs() {
         </div>
 
         <div class="example-section">
-          <button class="speak-btn" onclick="speak2('${c.example_hanzi}')">🔊</button>
+          <button class="speak-btn" onclick="speak('${c.example_hanzi}')">🔊</button>
           <button class="example-open-btn" id="example-open-btn">↓</button>
           <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
           <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
@@ -708,6 +732,7 @@ function renderSrs() {
   toggleBtn.onclick = () => {
     clicks++;
     if (clicks == 1) {
+      speak(c.hanzi);
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
     }
