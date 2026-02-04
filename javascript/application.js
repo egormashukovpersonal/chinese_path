@@ -537,6 +537,19 @@ function renderLevel(level, index = 0) {
 
   const isLast = index >= chars.length - 1;
 
+  const homophones = getKnownHomophones(c.hanzi, c.pinyin);
+  const homophonesHtml = homophones.length ? `
+      <div class="section">
+        <br>
+        <div class="homophones">
+          Омонимы: ${homophones.map(h =>
+            `<span class="homo">${h.hanzi} (${h.pinyin})</span>`
+          ).join(" ")}
+        </div>
+      </div>
+    `
+    : "";
+
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="back-btn" onclick="goBack(${level}, ${index})">←</button>
@@ -566,6 +579,8 @@ function renderLevel(level, index = 0) {
           ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
         </div>
 
+        ${homophonesHtml}
+
         <div class="example-section">
           <button class="speak-btn" onclick="speak('${c.example_hanzi}')">🔊</button>
           <button class="example-open-btn" id="example-open-btn">↓</button>
@@ -575,6 +590,7 @@ function renderLevel(level, index = 0) {
         </div>
 
         <h1>Deepseek</h1>
+
         <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
@@ -675,6 +691,19 @@ function renderSrs() {
   }
   const isLast = index >= chars.length - 1;
 
+  const homophones = getKnownHomophones(c.hanzi, c.pinyin);
+  const homophonesHtml = homophones.length ? `
+      <div class="section">
+        <br>
+        <div class="homophones">
+          Омонимы: ${homophones.map(h =>
+            `<span class="homo">${h.hanzi} (${h.pinyin})</span>`
+          ).join(" ")}
+        </div>
+      </div>
+    `
+    : "";
+
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="back-btn" onclick="location.hash = '#';">←</button>
@@ -705,6 +734,8 @@ function renderSrs() {
           ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
         </div>
 
+        ${homophonesHtml}
+
         <div class="example-section">
           <button class="speak-btn" onclick="speak('${c.example_hanzi}')">🔊</button>
           <button class="example-open-btn" id="example-open-btn">↓</button>
@@ -714,6 +745,7 @@ function renderSrs() {
         </div>
 
         <h1>Deepseek</h1>
+
         <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
         <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
@@ -902,6 +934,108 @@ document.addEventListener("touchend", e => {
   touchEndX = e.changedTouches[0].screenX;
   handleSwipe();
 });
+
+
+
+
+
+
+function normalizePinyin(pinyin) {
+  return pinyin
+    .toLowerCase()
+    .replace(/[āáǎà]/g, "a")
+    .replace(/[ēéěè]/g, "e")
+    .replace(/[īíǐì]/g, "i")
+    .replace(/[ōóǒò]/g, "o")
+    .replace(/[ūúǔù]/g, "u")
+    .replace(/[ǖǘǚǜü]/g, "u")
+    .replace(/\d/g, ""); // если вдруг цифры
+}
+
+function splitHanziAndPinyin(hanzi, pinyin) {
+  const chars = [...hanzi];
+  if (!pinyin) return [];
+
+  // 1️⃣ если один иероглиф — вообще не парсим
+  if (chars.length === 1) {
+    return [{ hanzi, pinyin }];
+  }
+
+  // 2️⃣ нормальный случай: пробелы есть
+  const spaced = pinyin.trim().split(/\s+/);
+  if (spaced.length === chars.length) {
+    return chars.map((h, i) => ({
+      hanzi: h,
+      pinyin: spaced[i]
+    }));
+  }
+
+  // 3️⃣ fallback: НЕ ЗНАЕМ как делить xuéxí
+  // → возвращаем иероглифы без пиньиня
+  return chars.map(h => ({
+    hanzi: h,
+    pinyin: null
+  }));
+}
+
+
+function buildHomophoneIndex() {
+  const learned = getAllLearnedChars();
+  const index = {};
+
+  learned.forEach(entry => {
+    const parts = splitHanziAndPinyin(entry.hanzi, entry.pinyin);
+
+    parts.forEach(({ hanzi, pinyin }) => {
+      const key = normalizePinyin(pinyin);
+
+      if (!index[key]) {
+        index[key] = [];
+      }
+
+      // не дублируем
+      if (!index[key].some(e => e.hanzi === hanzi)) {
+        index[key].push({ hanzi, pinyin });
+      }
+    });
+  });
+
+  return index;
+}
+
+
+let HOMOPHONES_INDEX = null;
+
+function getHomophonesIndex() {
+  if (!HOMOPHONES_INDEX) {
+    HOMOPHONES_INDEX = buildHomophoneIndex();
+  }
+  return HOMOPHONES_INDEX;
+}
+function getKnownHomophones(hanzi, pinyin) {
+  const index = getHomophonesIndex();
+  const parts = splitHanziAndPinyin(hanzi, pinyin);
+  const inputChars = new Set([...hanzi]);
+  const result = [];
+  const seen = new Set();
+
+  parts.forEach(({ pinyin: py }) => {
+    if (!py) return;
+
+    const key = normalizePinyin(py);
+    const list = index[key] || [];
+
+    list.forEach(e => {
+      if (inputChars.has(e.hanzi)) return;
+      if (seen.has(e.hanzi)) return;
+
+      seen.add(e.hanzi);
+      result.push(e);
+    });
+  });
+
+  return result;
+}
 
 
 (async function init() {
