@@ -396,6 +396,18 @@ function getAllLearnedChars() {
   return chars.filter(c => !isIgnoredFromSrs(c.hanzi));
 }
 
+function getAllLearnedCharsWithIgnored() {
+  const progress = getProgress();
+  const completedLevels = Object.keys(progress.completedLevels || {}).map(Number);
+
+  const chars = [];
+  completedLevels.forEach(level => {
+    chars.push(...getCharsForLevel(level));
+  });
+
+  return chars;
+}
+
 
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
@@ -980,7 +992,7 @@ function splitHanziAndPinyin(hanzi, pinyin) {
 
 
 function buildHomophoneIndex() {
-  const learned = getAllLearnedChars();
+  const learned = getAllLearnedCharsWithIgnored();
   const index = {};
 
   learned.forEach(entry => {
