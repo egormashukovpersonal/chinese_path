@@ -586,20 +586,20 @@ function renderLevel(level, index = 0) {
         </div>
       </div>
 
+      <div class="example-section">
+        <button id="example-p-speak"  class="speak-btn" style="display:none" onclick="speak('${c.example_hanzi}')">🔊</button>
+        <button id="example-open-btn" class="example-open-btn" style="display:none" >↓</button>
+        <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
+        <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
+        <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
+      </div>
+
       <div id="meaning" style="display:none">
         <div class="section">
           ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
-
-        <div class="example-section">
-          <button class="speak-btn" onclick="speak('${c.example_hanzi}')">🔊</button>
-          <button class="example-open-btn" id="example-open-btn">↓</button>
-          <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
-          <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
-          <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
-        </div>
 
         <h1>Deepseek</h1>
 
@@ -614,6 +614,8 @@ function renderLevel(level, index = 0) {
     </div>
   `;
 
+  const openExampleBtn = document.getElementById("example-open-btn");
+  const exampleSpeak = document.getElementById("example-p-speak");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -624,6 +626,8 @@ function renderLevel(level, index = 0) {
       speak(c.hanzi);
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
+      openExampleBtn.style.display = "block";
+      exampleSpeak.style.display = "block";
     }
     if (clicks == 2) {
       toggleBtn.style.display = 'none'
@@ -631,11 +635,13 @@ function renderLevel(level, index = 0) {
     };
   };
 
-  const openExampleBtn = document.getElementById("example-open-btn");
   const examplePinying = document.getElementById("example-p-pinying");
   const exampleRu = document.getElementById("example-p-ru");
   let exampleOpenClicks = 0
-  openExampleBtn.onclick = () => {
+
+  document.addEventListener("click", (e) => {
+    if (!e.target || e.target.id !== "example-open-btn") return;
+
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
       examplePinying.style.display = "block";
@@ -644,7 +650,7 @@ function renderLevel(level, index = 0) {
       exampleRu.style.display = "block";
       openExampleBtn.style.display = 'none'
     };
-  };
+  });
 
 }
 
@@ -741,20 +747,20 @@ function renderSrs() {
         </div>
       </div>
 
+      <div class="example-section">
+        <button id="example-p-speak"  class="speak-btn" style="display:none" onclick="speak('${c.example_hanzi}')">🔊</button>
+        <button id="example-open-btn" class="example-open-btn" style="display:none" >↓</button>
+        <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
+        <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
+        <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
+      </div>
+
       <div id="meaning" style="display:none">
         <div class="section">
           ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
-
-        <div class="example-section">
-          <button class="speak-btn" onclick="speak('${c.example_hanzi}')">🔊</button>
-          <button class="example-open-btn" id="example-open-btn">↓</button>
-          <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
-          <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
-          <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
-        </div>
 
         <h1>Deepseek</h1>
 
@@ -769,6 +775,8 @@ function renderSrs() {
     </div>
   `;
 
+  const openExampleBtn = document.getElementById("example-open-btn");
+  const exampleSpeak = document.getElementById("example-p-speak");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -779,6 +787,8 @@ function renderSrs() {
       speak(c.hanzi);
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
+      openExampleBtn.style.display = "block";
+      exampleSpeak.style.display = "block";
     }
     if (clicks == 2) {
       toggleBtn.style.display = 'none'
@@ -786,12 +796,13 @@ function renderSrs() {
     };
   };
 
-
-  const openExampleBtn = document.getElementById("example-open-btn");
   const examplePinying = document.getElementById("example-p-pinying");
   const exampleRu = document.getElementById("example-p-ru");
   let exampleOpenClicks = 0
-  openExampleBtn.onclick = () => {
+
+  document.addEventListener("click", (e) => {
+    if (!e.target || e.target.id !== "example-open-btn") return;
+
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
       examplePinying.style.display = "block";
@@ -800,7 +811,7 @@ function renderSrs() {
       exampleRu.style.display = "block";
       openExampleBtn.style.display = 'none'
     };
-  };
+  });
 
 }
 
