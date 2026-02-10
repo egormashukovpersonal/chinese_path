@@ -109,6 +109,11 @@ function restoreProgressToLevel(level) {
   window.location.reload();
 }
 
+function getHumanSrsLimit() {
+  const limit = getSrsLimit();
+  return limit == 9999999 ? 'All' : limit;
+}
+
 function getSrsLimit() {
   const progress = getProgress();
   return progress.settings?.srsLimit || 10;
@@ -117,7 +122,7 @@ function getSrsLimit() {
 function setSrsLimit(value) {
   const progress = getProgress();
   progress.settings ||= {};
-  progress.settings.srsLimit = value;
+  progress.settings.srsLimit = value == 'All' ? 9999999 : value;
   saveProgress(progress);
 }
 function toggleSrsSize() {
@@ -153,12 +158,14 @@ function renderPath() {
       <button id='srs-btn' onclick='startSrsSession()'>SRS</button>
       <button class="stats-toggle" onclick="toggleSrsCalendar()">▦</button>
       <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
+      <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
       <button class="line-break-toggle" onclick="toggleLineBreak()">↵</button>
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
-      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getSrsLimit()}</button>
+      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
+    <div id="homo-list" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
       <h1>Open levels til</h1>
@@ -176,6 +183,7 @@ function renderPath() {
       <button class="select-srs-size-btn" onclick="selectSrsSize(15)">15</button>
       <button class="select-srs-size-btn" onclick="selectSrsSize(25)">25</button>
       <button class="select-srs-size-btn" onclick="selectSrsSize(50)">50</button>
+      <button class="select-srs-size-btn" onclick="selectSrsSize('All')">All</button>
       <button class="srs-reset-ignored" onclick="resetIgnoredSrs()">Reset ignored</button>
     </div>
 
@@ -552,7 +560,6 @@ function renderLevel(level, index = 0) {
   const homophones = getKnownHomophones(c.hanzi, c.pinyin);
   const homophonesHtml = homophones.length ? `
       <div class="section">
-        <br>
         <div class="homophones">
           Омонимы: ${homophones.map(h =>
             `<span class="homo">${h.hanzi} (${h.pinyin})</span>`
@@ -596,7 +603,7 @@ function renderLevel(level, index = 0) {
 
       <div id="meaning" style="display:none">
         <div class="section">
-          ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+          Перевод: ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
@@ -712,10 +719,9 @@ function renderSrs() {
   const homophones = getKnownHomophones(c.hanzi, c.pinyin);
   const homophonesHtml = homophones.length ? `
       <div class="section">
-        <br>
         <div class="homophones">
           Омонимы: ${homophones.map(h =>
-            `<span class="homo">${h.hanzi} (${h.pinyin})</span>`
+            `${h.hanzi} (${h.pinyin})`
           ).join(" ")}
         </div>
       </div>
@@ -757,7 +763,7 @@ function renderSrs() {
 
       <div id="meaning" style="display:none">
         <div class="section">
-          ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+          Перевод: ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
@@ -851,6 +857,35 @@ function toggleSrsCalendar() {
   }
   el.style.display = el.style.display === "none" ? "block" : "none";
 }
+
+function toggleHomoList() {
+  const el = document.getElementById("homo-list");
+  if (!el.innerHTML) {
+    el.innerHTML = renderHomoList();
+  }
+  el.style.display = el.style.display === "none" ? "block" : "none";
+}
+
+function renderHomoList() {
+  const index = getHomophonesIndex();
+  let html = "";
+
+  for (const key in index) {
+    html += `
+      <div class="homo-row">
+        <div class="homo-key">${key}</div>
+        <div class="homo-values">
+          ${index[key].map(v => `
+            <span class="homo-val">${v.hanzi} (${v.pinyin})</span>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  return html;
+}
+
 
 function renderSrsMonth() {
   const history = getProgress().srsHistory || {};
