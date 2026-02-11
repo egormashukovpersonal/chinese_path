@@ -870,7 +870,11 @@ function renderHomoList() {
   const index = getHomophonesIndex();
   let html = "";
 
-  for (const key in index) {
+  const sortedKeys = Object.keys(index).sort((a, b) =>
+    a.localeCompare(b, 'en') // можно поменять локаль если нужно
+  );
+
+  for (const key of sortedKeys) {
     html += `
       <div class="homo-row">
         <div class="homo-key">${key}</div>
