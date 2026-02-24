@@ -914,11 +914,15 @@ function toggleSrsCalendar() {
 }
 
 function toggleHomoList() {
-  const el = document.getElementById("homo-list");
-  if (!el.innerHTML) {
-    el.innerHTML = renderHomoList();
+  const homoList = document.getElementById("homo-list");
+  if (!homoList.innerHTML) {
+    homoList.innerHTML = renderHomoList();
   }
-  el.style.display = el.style.display === "none" ? "block" : "none";
+  const path = document.getElementById("path");
+
+  homoList.style.display = homoList.style.display === "none" ? "block" : "none";
+  path.style.display = homoList.style.display === "none" ? "block" : "none";
+
   collapseAllHomoGroups();
 }
 function normalizeInitialTJQForSort(key) {
