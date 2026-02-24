@@ -5,7 +5,23 @@ body {
   font-family: system-ui, sans-serif;
   color: #fff;
 }
-
+html, body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.section,
+.example-section,
+.hanzi,
+.pinyin,
+.homo-values,
+.homo-val,
+#meaning,
+.char-card {
+  -webkit-user-select: text;
+  user-select: text;
+}
 #srs-btn {
   float: right;
   background: linear-gradient(135deg, #8e44ad, #3498db);
