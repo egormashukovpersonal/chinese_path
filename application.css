@@ -135,10 +135,17 @@ button {
 
 #toggle-meaning {
   position: fixed;
-  width: 100%;
+  width: 70%;
   z-index: 99;
   bottom: 300px;
   left: 0px;
+}
+#incremental-reveal-pinyin {
+  position: fixed;
+  width: 30%;
+  z-index: 99;
+  bottom: 300px;
+  right: 0px;
 }
 
 .pinyin-row {
@@ -208,6 +215,15 @@ button.locked {
   background: none !important;
   width: 7%;
   border: none !important;
+}
+
+.homo-letter-section {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+.homo-expand-collapse {
+  width: 50%;
+  float: left;
 }
 
 .pinyin-toggle {
@@ -327,23 +343,24 @@ button.completed .level-number{
 .homo-row {
   display: flex;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 
 .homo-key {
-  flex: 0 0 30%;
+  flex: 0 0 28%;
   font-size: 70px;
   opacity: 0.7;
 }
 
 .homo-values {
   flex: 1;
-  font-size: 70px;
+  font-size: 130px;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 0px;
 }
 
 .homo-val {
   white-space: nowrap;
+  width: 100%;
 }

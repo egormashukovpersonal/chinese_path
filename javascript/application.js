@@ -4,9 +4,6 @@ const CHARS_PER_LEVEL = 4;
 
 
 (function initPreviewSettings() {
-  if (localStorage.getItem("useLineBreak") === null) {
-    localStorage.setItem("useLineBreak", "false");
-  }
   if (localStorage.getItem("usePinyin") === null) {
     localStorage.setItem("usePinyin", "false");
   }
@@ -159,7 +156,6 @@ function renderPath() {
       <button class="stats-toggle" onclick="toggleSrsCalendar()">▦</button>
       <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
-      <button class="line-break-toggle" onclick="toggleLineBreak()">↵</button>
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
       <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
     </div>
@@ -488,36 +484,20 @@ function range(a, b) {
   return res;
 }
 
-function toggleLineBreak() {
-  const current = localStorage.getItem("useLineBreak") !== "false";
-
-  let next = !current;
-
-  if (localStorage.getItem("usePinyin") !== "false") {
-    next = false
-  }
-  localStorage.setItem("useLineBreak", String(next));
-
-  renderPath();
-}
-
 function togglePinyin() {
   const current = localStorage.getItem("usePinyin") !== "false";
 
   const next = !current;
   localStorage.setItem("usePinyin", String(next));
-  localStorage.setItem("useLineBreak", String(false));
 
   renderPath();
 }
 
 function getHanziPreviewForLevel(level) {
-  let useLineBreak = localStorage.getItem("useLineBreak") !== "false";
   let usePinyin = localStorage.getItem("usePinyin") !== "false";
-  const sep = useLineBreak ? "<br>" : " ";
+  const sep = "";
 
   let filtered = getCharsForLevel(level).filter(c => !isIgnoredFromSrs(c.hanzi))
-
 
   return filtered.map((c, i) =>
       usePinyin
@@ -526,7 +506,7 @@ function getHanziPreviewForLevel(level) {
              <div>${c.pinyin}</div>
              ${i < filtered.length - 1 ? '<hr>' : ''}
            </div>`
-        : `${c.hanzi}`
+        : `<div>${c.hanzi}</div>`
     )
     .join(sep);
 }
@@ -585,7 +565,11 @@ function renderLevel(level, index = 0) {
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi">${c.hanzi}</div>
-      <button id="toggle-meaning" class="secondary-btn">Pinying</button>
+
+      <div style="display:flex; gap:20px; justify-content:center;">
+        <button id="toggle-meaning" class="secondary-btn">Pinying</button>
+        <button id="incremental-reveal-pinyin" class="secondary-btn">+</button>
+      </div>
 
       <div id="toggle-pinyin" style="display: none;">
         <div class="pinyin-row">
@@ -626,13 +610,23 @@ function renderLevel(level, index = 0) {
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
+
+  const incrementalRevealBtn = document.getElementById("incremental-reveal-pinyin");
+  const pinyinTextEl = pinyin.querySelector(".pinyin");
+  const fullPinyin = c.pinyin || "";
+
+  let revealIndex = 0;
   let clicks = 0
+
   toggleBtn.onclick = () => {
     clicks++;
     if (clicks == 1) {
       speak(c.hanzi);
+      incrementalRevealBtn.style.display = 'none'
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
+      toggleBtn.style.width = '100%'
+      pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
       openExampleBtn.style.display = "block";
       exampleSpeak.style.display = "block";
     }
@@ -640,6 +634,28 @@ function renderLevel(level, index = 0) {
       toggleBtn.style.display = 'none'
       meaning.style.display = "block";
     };
+  };
+
+  incrementalRevealBtn.onclick = () => {
+    if (!fullPinyin) return;
+
+    // первое нажатие — просто показать все звёздочки
+    if (revealIndex === 0) {
+      pinyin.style.display = "block";
+      pinyinTextEl.textContent = maskedPinyin(fullPinyin, 0);
+      revealIndex = 1; // подготовка к следующему шагу
+      return;
+    }
+
+    // последующие нажатия
+    pinyinTextEl.textContent = maskedPinyin(fullPinyin, revealIndex);
+
+    revealIndex++;
+
+    if (revealIndex > fullPinyin.length) {
+      incrementalRevealBtn.style.display = "none";
+      toggleBtn.click();
+    }
   };
 
   const examplePinying = document.getElementById("example-p-pinying");
@@ -658,9 +674,13 @@ function renderLevel(level, index = 0) {
       openExampleBtn.style.display = 'none'
     };
   });
-
 }
-
+function maskedPinyin(fullPinyin, count) {
+  return [...fullPinyin].map((ch, i) => {
+    if (ch === " ") return " ";
+    return i < count ? ch : "*";
+  }).join("");
+}
 function explainInChatGPT(hanzi) {
   const text = `объясни из каких черт и элементов состоит иероглиф ${hanzi}\n`;
 
@@ -745,7 +765,11 @@ function renderSrs() {
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi">${c.hanzi}</div>
-      <button id="toggle-meaning" class="secondary-btn">Pinying</button>
+
+      <div style="display:flex; gap:20px; justify-content:center;">
+        <button id="toggle-meaning" class="secondary-btn">Pinying</button>
+        <button id="incremental-reveal-pinyin" class="secondary-btn">+</button>
+      </div>
 
       <div id="toggle-pinyin" style="display: none;">
         <div class="pinyin-row">
@@ -786,13 +810,23 @@ function renderSrs() {
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
+
+  const incrementalRevealBtn = document.getElementById("incremental-reveal-pinyin");
+  const pinyinTextEl = pinyin.querySelector(".pinyin");
+  const fullPinyin = c.pinyin || "";
+
+  let revealIndex = 0;
   let clicks = 0
+
   toggleBtn.onclick = () => {
     clicks++;
     if (clicks == 1) {
       speak(c.hanzi);
+      incrementalRevealBtn.style.display = 'none'
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
+      toggleBtn.style.width = '100%'
+      pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
       openExampleBtn.style.display = "block";
       exampleSpeak.style.display = "block";
     }
@@ -800,6 +834,28 @@ function renderSrs() {
       toggleBtn.style.display = 'none'
       meaning.style.display = "block";
     };
+  };
+
+  incrementalRevealBtn.onclick = () => {
+    if (!fullPinyin) return;
+
+    // первое нажатие — просто показать все звёздочки
+    if (revealIndex === 0) {
+      pinyin.style.display = "block";
+      pinyinTextEl.textContent = maskedPinyin(fullPinyin, 0);
+      revealIndex = 1; // подготовка к следующему шагу
+      return;
+    }
+
+    // последующие нажатия
+    pinyinTextEl.textContent = maskedPinyin(fullPinyin, revealIndex);
+
+    revealIndex++;
+
+    if (revealIndex > fullPinyin.length) {
+      incrementalRevealBtn.style.display = "none";
+      toggleBtn.click();
+    }
   };
 
   const examplePinying = document.getElementById("example-p-pinying");
@@ -818,7 +874,6 @@ function renderSrs() {
       openExampleBtn.style.display = 'none'
     };
   });
-
 }
 
 function nextSrs() {
@@ -864,33 +919,136 @@ function toggleHomoList() {
     el.innerHTML = renderHomoList();
   }
   el.style.display = el.style.display === "none" ? "block" : "none";
+  collapseAllHomoGroups();
 }
+function normalizeInitialTJQForSort(key) {
+  if (!key) return key;
 
+  const first = key[0];
+
+  // приравниваем t == j == q
+  if (first === 't' || first === 'j' || first === 'q') {
+    return 'q' + key.slice(1);
+  }
+
+  if (key == 'zai') {
+    return 'cai'
+  }
+
+  if (key == 'zuo') {
+    return 'cuo'
+  }
+
+  return key;
+}
 function renderHomoList() {
   const index = getHomophonesIndex();
   let html = "";
 
-  const sortedKeys = Object.keys(index).sort((a, b) =>
-    a.localeCompare(b, 'en') // можно поменять локаль если нужно
-  );
+  html += `
+    <div style="height: 200px;">
+      <button class="homo-expand-collapse" onclick="collapseAllHomoGroups()">Collapse All</button>
+      <button class="homo-expand-collapse" onclick="expandAllHomoGroups()">Expand All</button>
+    </div>
+  `;
+
+  const sortedKeys = Object.keys(index).sort((a, b) => {
+    const na = normalizeInitialTJQForSort(a);
+    const nb = normalizeInitialTJQForSort(b);
+
+    if (na === nb) {
+      return a.localeCompare(b, 'en');
+    }
+
+    return na.localeCompare(nb, 'en');
+  });
+
+  // 🔹 сгруппируем ключи по секциям заранее
+  const groups = {};
+  let tjqShown = false;
+  let zcShown = false;
 
   for (const key of sortedKeys) {
-    html += `
-      <div class="homo-row">
-        <div class="homo-key">${key}</div>
-        <div class="homo-values">
-          ${index[key].map(v => `
-            <span class="homo-val">${v.hanzi} (${v.pinyin})</span>
-          `).join("")}
+    const firstLetter = key.charAt(0).toUpperCase();
+
+    let groupName;
+
+    if (["T", "Q", "J"].includes(firstLetter)) {
+      groupName = "T/Q/J";
+    } else if (["zuo", "cuo", "zai", "cai"].includes(key) || firstLetter === "C") {
+      groupName = "C/Z";
+    } else {
+      groupName = firstLetter;
+    }
+
+    groups[groupName] ||= [];
+    groups[groupName].push(key);
+  }
+
+  for (const groupName of Object.keys(groups)) {
+    const keys = groups[groupName];
+
+    // 🔹 считаем ОБЩЕЕ количество иероглифов
+    const totalChars = keys.reduce((sum, key) => {
+      return sum + (index[key]?.length || 0);
+    }, 0);
+
+    html += `<h1 class="homo-letter-section">
+               ${groupName} (${totalChars})
+             </h1>`;
+
+    for (const key of keys) {
+      html += `
+        <div class="homo-row">
+          <div class="homo-key">${key}</div>
+          <div class="homo-values">
+            ${index[key].map(v => `
+              <span class="homo-val" onclick="speak('${v.hanzi}')">
+                ${v.hanzi} (${v.pinyin})
+              </span>
+            `).join("")}
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   }
 
   return html;
 }
 
+function collapseAllHomoGroups() {
+  const headers = document.querySelectorAll(".homo-letter-section");
 
+  headers.forEach(header => {
+    header.classList.add("collapsed");
+
+    let next = header.nextElementSibling;
+
+    while (next && !next.classList.contains("homo-letter-section")) {
+      if (next.classList.contains("homo-row")) {
+        next.style.display = "none";
+      }
+      next = next.nextElementSibling;
+    }
+  });
+}
+
+function expandAllHomoGroups() {
+  const headers = document.querySelectorAll(".homo-letter-section");
+
+  headers.forEach(header => {
+    header.classList.remove("collapsed");
+
+    let next = header.nextElementSibling;
+
+    while (next && !next.classList.contains("homo-letter-section")) {
+      if (next.classList.contains("homo-row")) {
+        next.style.display = "flex";
+      }
+      next = next.nextElementSibling;
+    }
+  });
+}
 function renderSrsMonth() {
   const history = getProgress().srsHistory || {};
   const now = new Date();
@@ -1030,8 +1188,40 @@ function getKnownHomophones(hanzi, pinyin) {
   return result;
 }
 
+GROUP_EQUIVALENT = {
+  t: 'q',
+  j: 'q',
+  q: 'q'
+}
+function normalizeForSort(word) {
+  const first = word[0].toLowerCase()
+
+  if (['t', 'j', 'q'].includes(first)) {
+    return 'q' + word.slice(1)
+  }
+
+  return word
+}
 
 (async function init() {
   await loadHSK();
   router();
+
+  document.addEventListener("click", function (e) {
+    const header = e.target.closest(".homo-letter-section");
+    if (!header) return;
+
+    let next = header.nextElementSibling;
+    const shouldHide = !header.classList.contains("collapsed");
+
+    header.classList.toggle("collapsed");
+
+    while (next && !next.classList.contains("homo-letter-section")) {
+      if (next.classList.contains("homo-row")) {
+        next.style.display = shouldHide ? "none" : "flex";
+      }
+      next = next.nextElementSibling;
+    }
+  });
+
 })();
