@@ -155,9 +155,9 @@ function renderPath() {
       <button id='srs-btn' onclick='startSrsSession()'>SRS</button>
       <button class="stats-toggle" onclick="toggleSrsCalendar()">▦</button>
       <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
+      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
-      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>

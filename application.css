@@ -213,18 +213,22 @@ button.locked {
   width: 7%;
   margin-left: 20px;
   border: none !important;
+  font-size: 70px;
 }
 
 .homo-toggle {
-  background: none !important;
-  width: 7%;
   border: none !important;
+  font-size: 70px;
+  background: #303030 !important;
+  width: 15%;
+  border-radius: 20px;
 }
 
 .dev-toggle {
   background: none !important;
   width: 7%;
   border: none !important;
+  font-size: 70px;
 }
 
 .line-break-toggle {
@@ -243,9 +247,11 @@ button.locked {
 }
 
 .pinyin-toggle {
-  background: none !important;
-  width: 7%;
   border: none !important;
+  font-size: 70px;
+  background: #303030 !important;
+  width: 15%;
+  border-radius: 20px;
 }
 
 #srs-calendar h1 {
@@ -280,6 +286,7 @@ button.locked {
   width: 10%;
   background: none !important;
   border: none;
+  font-size: 70px;
 }
 .select-srs-size-btn {
   width: 15%;
@@ -347,7 +354,7 @@ button.completed .level-number{
 }
 
 .level-hanzi {
-  font-size: 50px;
+  font-size: 60px;
   margin-top: 0px;
   padding: 0 3px;
 }
