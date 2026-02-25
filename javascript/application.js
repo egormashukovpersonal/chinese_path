@@ -578,11 +578,11 @@ function renderLevel(level, index = 0) {
       </div>
 
       <div class="example-section">
-        <button id="example-p-speak"  class="speak-btn" style="display:none" onclick="speak('${c.example_hanzi}')">🔊</button>
-        <button id="example-open-btn" class="example-open-btn" style="display:none" >↓</button>
+        <button id="example-p-speak"  class="speak-btn" style="display:block" onclick="speak('${c.example_hanzi}')">🔊</button>
+        <button id="example-open-btn" class="example-open-btn" style="display:block" >↓</button>
         <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
-        <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
-        <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
+        <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
+        <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
       </div>
 
       <div id="meaning" style="display:none">
@@ -667,13 +667,15 @@ function renderLevel(level, index = 0) {
 
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
-      examplePinying.style.display = "block";
+      examplePinying.style.visibility = "visible";
     }
     if (exampleOpenClicks == 2) {
-      exampleRu.style.display = "block";
+      exampleRu.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
     };
   });
+
+  incrementalRevealBtn.click();
 }
 function maskedPinyin(fullPinyin, count) {
   return [...fullPinyin].map((ch, i) => {
@@ -778,11 +780,11 @@ function renderSrs() {
       </div>
 
       <div class="example-section">
-        <button id="example-p-speak"  class="speak-btn" style="display:none" onclick="speak('${c.example_hanzi}')">🔊</button>
-        <button id="example-open-btn" class="example-open-btn" style="display:none" >↓</button>
+        <button id="example-p-speak"  class="speak-btn" style="display:block" onclick="speak('${c.example_hanzi}')">🔊</button>
+        <button id="example-open-btn" class="example-open-btn" style="display:block" >↓</button>
         <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
-        <p class="section example-p example-p-pinying" id="example-p-pinying" style="display:none">${c.example_pinying}</p>
-        <p class="section example-p example-p-ru" id="example-p-ru" style="display:none">${c.example_ru}</p>
+        <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
+        <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
       </div>
 
       <div id="meaning" style="display:none">
@@ -867,13 +869,15 @@ function renderSrs() {
 
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
-      examplePinying.style.display = "block";
+      examplePinying.style.visibility = "visible";
     }
     if (exampleOpenClicks == 2) {
-      exampleRu.style.display = "block";
+      exampleRu.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
     };
   });
+
+  incrementalRevealBtn.click();
 }
 
 function nextSrs() {

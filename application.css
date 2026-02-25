@@ -112,6 +112,7 @@ button {
 .pinyin {
   font-size: 60px;
   text-align: center;
+  font-family: monospace;
 }
 .section {
   font-size: 3.5rem;
@@ -124,7 +125,7 @@ button {
   margin: 0;
 }
 .example-p-hanzi {
-  font-size: 5.5rem;
+  font-size: 10rem;
 }
 .example-open-btn {
   width: 20%;
