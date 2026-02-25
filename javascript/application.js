@@ -557,14 +557,14 @@ function renderLevel(level, index = 0) {
           ? `<button class="next-btn" onclick="location.hash='#/level/${level}/${index + 1}'">→</button>`
           : `<button class="next-btn" onclick="finishLevel(${level})">✓</button>`
       }
-      <button class="speak-btn" onclick="speak('${c.hanzi}')">🔊</button>
+      <button id="example-open-btn" class="example-open-btn">↓</button>
     </div>
 
     <h1>Level ${level}</h1>
 
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
-      <div class="hanzi">${c.hanzi}</div>
+      <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
         <button id="toggle-meaning" class="secondary-btn">Pinying</button>
@@ -578,9 +578,7 @@ function renderLevel(level, index = 0) {
       </div>
 
       <div class="example-section">
-        <button id="example-p-speak"  class="speak-btn" style="display:block" onclick="speak('${c.example_hanzi}')">🔊</button>
-        <button id="example-open-btn" class="example-open-btn" style="display:block" >↓</button>
-        <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
+        <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
         <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
       </div>
@@ -606,7 +604,6 @@ function renderLevel(level, index = 0) {
   `;
 
   const openExampleBtn = document.getElementById("example-open-btn");
-  const exampleSpeak = document.getElementById("example-p-speak");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -627,12 +624,12 @@ function renderLevel(level, index = 0) {
       toggleBtn.textContent = "Open";
       toggleBtn.style.width = '100%'
       pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
-      openExampleBtn.style.display = "block";
-      exampleSpeak.style.display = "block";
     }
     if (clicks == 2) {
       toggleBtn.style.display = 'none'
       meaning.style.display = "block";
+      openExampleBtn.click();
+      openExampleBtn.click();
     };
   };
 
@@ -759,14 +756,14 @@ function renderSrs() {
       <button class="next-srs-btn"  onclick="nextSrs()">
         ${isLast ? "✓" : "→"}
       </button>
-      <button class="speak-btn" onclick="speak('${c.hanzi}')">🔊</button>
+      <button id="example-open-btn" class="example-open-btn">↓</button>
     </div>
 
     <h1>SRS</h1>
 
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
-      <div class="hanzi">${c.hanzi}</div>
+      <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
         <button id="toggle-meaning" class="secondary-btn">Pinying</button>
@@ -780,9 +777,7 @@ function renderSrs() {
       </div>
 
       <div class="example-section">
-        <button id="example-p-speak"  class="speak-btn" style="display:block" onclick="speak('${c.example_hanzi}')">🔊</button>
-        <button id="example-open-btn" class="example-open-btn" style="display:block" >↓</button>
-        <p class="section example-p example-p-hanzi">${c.example_hanzi}</p>
+        <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
         <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
       </div>
@@ -808,7 +803,6 @@ function renderSrs() {
   `;
 
   const openExampleBtn = document.getElementById("example-open-btn");
-  const exampleSpeak = document.getElementById("example-p-speak");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -829,12 +823,12 @@ function renderSrs() {
       toggleBtn.textContent = "Open";
       toggleBtn.style.width = '100%'
       pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
-      openExampleBtn.style.display = "block";
-      exampleSpeak.style.display = "block";
     }
     if (clicks == 2) {
       toggleBtn.style.display = 'none'
       meaning.style.display = "block";
+      openExampleBtn.click();
+      openExampleBtn.click();
     };
   };
 

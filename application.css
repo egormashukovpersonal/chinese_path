@@ -127,13 +127,6 @@ button {
 .example-p-hanzi {
   font-size: 10rem;
 }
-.example-open-btn {
-  width: 20%;
-  float: right;
-  clear: right;
-  margin-right: 2%;
-  margin-top: 20px;
-}
 .example-p-pinying {
   font-size: 5rem;
 }
@@ -175,7 +168,7 @@ button {
   text-align: center;
 }
 
-.speak-btn {
+.example-open-btn {
   border: none;
   font-size: 60px;
   cursor: pointer;
