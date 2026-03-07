@@ -153,7 +153,7 @@ function renderPath() {
   app.innerHTML = `
     <div class="fixed-bottom">
       <button id='srs-btn' onclick='startSrsSession()'>SRS</button>
-      <button class="stats-toggle" onclick="toggleSrsCalendar()">▦</button>
+      <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
       <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
       <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>

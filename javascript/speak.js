@@ -1,4 +1,8 @@
+let SPEAK_MUTED = localStorage.getItem("speakMuted") === "true";
+
 function speak(text) {
+  if (SPEAK_MUTED) return;
+
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "zh-CN";
   u.rate = 0.9;
@@ -19,4 +23,15 @@ function speak(text) {
   } else {
     pickVoice();
   }
+}
+
+function toggleSpeakMute() {
+  SPEAK_MUTED = !SPEAK_MUTED;
+
+  localStorage.setItem("speakMuted", SPEAK_MUTED);
+
+  const btn = document.getElementById("speak-mute-btn");
+  if (!btn) return;
+
+  btn.textContent = SPEAK_MUTED ? "🔇" : "🔊";
 }

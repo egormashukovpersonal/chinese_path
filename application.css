@@ -209,6 +209,13 @@ button.locked {
   border: none !important;
   font-size: 70px;
 }
+#speak-mute-btn {
+  background: none !important;
+  width: 7%;
+  margin-left: 20px;
+  border: none !important;
+  font-size: 70px;
+}
 
 .homo-toggle {
   border: none !important;
