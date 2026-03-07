@@ -758,9 +758,6 @@ function renderSrs() {
       </button>
       <button id="example-open-btn" class="example-open-btn">↓</button>
     </div>
-
-    <h1>SRS</h1>
-
     <div class="char-card">
       <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
