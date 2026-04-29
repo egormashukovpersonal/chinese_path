@@ -1,7 +1,9 @@
 const LEVELS_PER_ROW = 5;
 const TURN_LENGTH = 0;
-const CHARS_PER_LEVEL = 4;
-
+const CHARS_PER_LEVEL = 1;
+const CUSTOM_HANZI_START_ID = 100000;
+const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+const DEEPSEEK_MODEL = "deepseek-chat";
 
 (function initPreviewSettings() {
   if (localStorage.getItem("usePinyin") === null) {
@@ -43,6 +45,15 @@ function router() {
     return;
   }
 
+  const customMatch = hash.match(/^#\/custom(?:\/(\d+))?/);
+
+  if (customMatch) {
+    const index = parseInt(customMatch[1] || "0", 10);
+    renderCustomChar(index);
+    if (srsBtn) srsBtn.style.display = "none";
+    return;
+  }
+
   const levelMatch = hash.match(/^#\/level\/(\d+)(?:\/(\d+))?/);
 
   if (levelMatch) {
@@ -62,6 +73,248 @@ function getProgress() {
 
 function saveProgress(progress) {
   localStorage.setItem("progress", JSON.stringify(progress));
+}
+
+
+function getCustomChars() {
+  return JSON.parse(localStorage.getItem("customHanzi") || "[]");
+}
+
+function saveCustomChars(chars) {
+  localStorage.setItem("customHanzi", JSON.stringify(chars));
+  HOMOPHONES_INDEX = null;
+}
+
+function getDeepSeekApiKey() {
+  return localStorage.getItem("deepseekApiKey") || "";
+}
+
+function setDeepSeekApiKey(value) {
+  localStorage.setItem("deepseekApiKey", value.trim());
+}
+
+function nextCustomHanziId() {
+  const ids = getCustomChars().map(c => Number(c.id)).filter(Number.isFinite);
+  return Math.max(CUSTOM_HANZI_START_ID - 1, ...ids) + 1;
+}
+
+function normalizeGeneratedCustomChar(hanzi, result) {
+  const translations = Array.isArray(result.translations) ? result.translations : [];
+  const ruTranslations = Array.isArray(result.ru_translations) ? result.ru_translations : [];
+  const plTranslations = Array.isArray(result.pl_translations) ? result.pl_translations : [];
+
+  return {
+    id: nextCustomHanziId(),
+    custom: true,
+    hanzi,
+    pinyin: result.pinyin || "",
+    translations,
+    ru_translations: ruTranslations,
+    pl_translations: plTranslations,
+    deepseek_description_paragraph_1: result.deepseek_description_paragraph_1 || "",
+    deepseek_description_paragraph_2: result.deepseek_description_paragraph_2 || "",
+    deepseek_description_paragraph_3: result.deepseek_description_paragraph_3 || "",
+    deepseek_description_paragraph_4: result.deepseek_description_paragraph_4 || "",
+    deepseek_description_pl_paragraph_1: result.deepseek_description_pl_paragraph_1 || "",
+    deepseek_description_pl_paragraph_2: result.deepseek_description_pl_paragraph_2 || "",
+    deepseek_description_pl_paragraph_3: result.deepseek_description_pl_paragraph_3 || "",
+    deepseek_description_pl_paragraph_4: result.deepseek_description_pl_paragraph_4 || "",
+    example_hanzi: result.example_hanzi || hanzi,
+    example_pinying: result.example_pinying || result.example_pinyin || result.pinyin || "",
+    example_ru: result.example_ru || ""
+  };
+}
+
+function buildCustomHanziPrompt(hanzi) {
+  return `Ты помогаешь мне создать персональную систему изучения китайских SIMPLIFIED иероглифов.
+
+Для иероглифа: ${hanzi}
+
+В ответе сгенерируй СТРОГО JSON со следующими ключами:
+
+pinyin:
+- пиньинь с тонами
+
+translations:
+- массив из 1–3 кратких переводов на английском
+
+ru_translations:
+- массив из 1–2 кратких переводов на русском
+- если возможно — один перевод
+- не дублируй синонимы
+
+deepseek_description_paragraph_1:
+- общее понятное объяснение иероглифа
+- что он означает в современном языке
+
+deepseek_description_paragraph_2:
+- внимательный разбор структуры иероглифа
+- если иероглиф составной — объясни каждый компонент, включая вложенные компоненты вроде 口 внутри 各
+- если есть радикал — упомяни его роль
+- не выдумывай мнемонику, если структура исторически не прозрачна
+
+deepseek_description_paragraph_3:
+- как и где иероглиф обычно используется
+- устойчивые контексты, оттенки значения
+
+deepseek_description_paragraph_4:
+- краткий культурный или исторический аспект
+- ТОЛЬКО если он реально уместен
+- без эзотерики и надуманных обобщений
+
+pl_translations:
+- массив из 1–2 кратких переводов по польски
+- если возможно — один перевод
+- не дублируй синонимы
+
+deepseek_description_pl_paragraph_1:
+- общее понятное объяснение иероглифа ПО ПОЛЬСКИ
+
+deepseek_description_pl_paragraph_2:
+- внимательный разбор структуры иероглифа ПО ПОЛЬСКИ
+
+deepseek_description_pl_paragraph_3:
+- как и где иероглиф обычно используется ПО ПОЛЬСКИ
+
+deepseek_description_pl_paragraph_4:
+- краткий культурный или исторический аспект ПО ПОЛЬСКИ, только если уместно
+
+example_hanzi:
+- короткий пример предложения с этим иероглифом
+
+example_pinying:
+- пиньинь примера
+
+example_ru:
+- русский перевод примера
+
+Ограничения:
+- каждый параграф — 2–4 предложения
+- когда пишешь иероглиф, всегда рядом добавляй пиньинь
+- никакого текста вне JSON
+- без Markdown
+- без вступлений`;
+}
+
+async function addCustomHanziFromInput() {
+  const hanziInput = document.getElementById("custom-hanzi-input");
+  const apiKeyInput = document.getElementById("deepseek-api-key-input");
+  const status = document.getElementById("custom-hanzi-status");
+
+  const hanzi = (hanziInput?.value || "").trim();
+  const apiKey = (apiKeyInput?.value || getDeepSeekApiKey()).trim();
+
+  if (!hanzi) return;
+  if (!apiKey) {
+    status.textContent = "Add DeepSeek API key first";
+    return;
+  }
+
+  setDeepSeekApiKey(apiKey);
+
+  const existing = getCustomChars().find(c => c.hanzi === hanzi); // || HSK.find(c => c.hanzi === hanzi);
+  if (existing) {
+    status.textContent = "Already exists";
+    return;
+  }
+
+  status.textContent = "Generating...";
+
+  try {
+    const response = await fetch(DEEPSEEK_API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: DEEPSEEK_MODEL,
+        messages: [
+          { role: "user", content: buildCustomHanziPrompt(hanzi) }
+        ],
+        temperature: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`DeepSeek error ${response.status}`);
+    }
+
+    const payload = await response.json();
+    let content = payload?.choices?.[0]?.message?.content || "{}";
+    content = content.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
+
+    const result = JSON.parse(content);
+    const newChar = normalizeGeneratedCustomChar(hanzi, result);
+    const chars = getCustomChars();
+    chars.push(newChar);
+    saveCustomChars(chars);
+
+    hanziInput.value = "";
+    status.textContent = "Saved";
+    location.hash = "#";
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+    status.textContent = `Error: ${e.message}`;
+  }
+}
+
+function deleteCustomHanzi(hanzi) {
+  const chars = getCustomChars().filter(c => c.hanzi !== hanzi);
+  saveCustomChars(chars);
+
+  const progress = getProgress();
+  if (progress.ignoredFromSrs) {
+    delete progress.ignoredFromSrs[hanzi];
+    saveProgress(progress);
+  }
+
+  removeCharFromCurrentSrsSession(hanzi);
+}
+function isCustomHanzi(hanzi) {
+  return getCustomChars().some(c => c.hanzi === hanzi);
+}
+function removeCharFromUiAndSrs(hanzi, options = {}) {
+  if (isCustomHanzi(hanzi)) {
+    deleteCustomHanzi(hanzi);
+  } else {
+    ignoreCharFromSrs(hanzi);
+    removeCharFromCurrentSrsSession(hanzi);
+  }
+
+  HOMOPHONES_INDEX = null;
+
+  if (options.mode === "custom") {
+    renderCustomChar(options.index || 0);
+    return;
+  }
+
+  if (options.mode === "level") {
+    renderLevel(options.level, options.index);
+    return;
+  }
+
+  if (options.mode === "srs") {
+    renderSrs();
+    return;
+  }
+
+  location.hash = "#";
+  window.location.reload();
+}
+
+function removeCharFromCurrentSrsSession(hanzi) {
+  const session = JSON.parse(localStorage.getItem("srsSession") || "null");
+  if (!session) return;
+
+  session.chars = session.chars.filter(c => c.hanzi !== hanzi);
+
+  if (session.index >= session.chars.length) {
+    session.index = Math.max(0, session.chars.length - 1);
+  }
+
+  localStorage.setItem("srsSession", JSON.stringify(session));
 }
 
 function markLevelCompleted(level) {
@@ -171,6 +424,12 @@ function renderPath() {
       <h1>Ignore levels til</h1>
       <input type="number" id="ignore-level" placeholder="Ignore levels til" min="1"/>
       <button class="ignore-rom-input-btn" onclick="ignoreSrsUntilLevel()">Save</button>
+
+      <h1>Add custom hanzi</h1>
+      <input type="password" id="deepseek-api-key-input" placeholder="DeepSeek API key" value="${getDeepSeekApiKey()}"/>
+      <input type="text" id="custom-hanzi-input" placeholder="Hanzi" maxlength="8"/>
+      <button class="custom-hanzi-input-btn" onclick="addCustomHanziFromInput()">Add</button>
+      <div id="custom-hanzi-status" class="custom-hanzi-status"></div>
     </div>
 
     <div id="srs-size-menu" class="srs-size-menu" style="display:none">
@@ -184,8 +443,10 @@ function renderPath() {
     </div>
 
 
+    <div id='custom-hanzi-list'></div>
     <div class='path' id='path'></div>
   `;
+  renderCustomHanziList();
   const path = document.getElementById("path");
 
   let index = 0;
@@ -210,6 +471,30 @@ function renderPath() {
 
     direction = direction === "forward" ? "backward" : "forward";
   }
+}
+
+
+function renderCustomHanziList() {
+  const container = document.getElementById("custom-hanzi-list");
+  if (!container) return;
+
+  const customChars = getCustomChars();
+  if (!customChars.length) {
+    container.innerHTML = "";
+    return;
+  }
+  let usePinyin = localStorage.getItem("usePinyin") !== "false";
+
+  container.innerHTML = `
+    <div class="custom-hanzi-grid">
+      ${customChars.map((c, index) => `
+        <button class="custom-hanzi-card" onclick="location.hash='#/custom/${index}'">
+          <span class="custom-hanzi-main">${c.hanzi}</span>
+          ${usePinyin ? `<span class="custom-hanzi-pinyin">${c.pinyin || ""}</span>` : ""}
+        </button>
+      `).join("")}
+    </div>
+  `;
 }
 
 function ignoreSrsUntilLevel() {
@@ -289,7 +574,7 @@ function createRowFromLevels(container, direction, levels) {
           ? index * step
           : (count - 1 - index) * step;
 
-      btn.style.marginTop = `${offset}px`;
+      // btn.style.marginTop = `${offset}px`;
     }
 
     if (isLevelCompleted(lvl)) {
@@ -352,7 +637,7 @@ function createRow(container, direction, start, end) {
           ? index * step
           : (count - 1 - index) * step;
 
-      btn.style.marginTop = `${offset}px`;
+      // btn.style.marginTop = `${offset}px`;
     }
 
     if (isLevelCompleted(lvl)) {
@@ -397,6 +682,8 @@ function getAllLearnedChars() {
     chars.push(...getCharsForLevel(level));
   });
 
+  chars.push(...getCustomChars());
+
   return chars.filter(c => !isIgnoredFromSrs(c.hanzi));
 }
 
@@ -408,6 +695,8 @@ function getAllLearnedCharsWithIgnored() {
   completedLevels.forEach(level => {
     chars.push(...getCharsForLevel(level));
   });
+
+  chars.push(...getCustomChars());
 
   return chars;
 }
@@ -531,6 +820,155 @@ function finishLevel(level) {
   window.location.reload();
 }
 
+
+function renderCustomChar(index = 0) {
+  const chars = getCustomChars();
+  const c = chars[index];
+
+  if (!c) {
+    location.hash = "#";
+    return;
+  }
+
+  const isLast = index >= chars.length - 1;
+  const isFirst = index <= 0;
+
+  const homophones = getKnownHomophones(c.hanzi, c.pinyin);
+  const homophonesHtml = homophones.length ? `
+      <div class="section">
+        <div class="homophones">
+          Омонимы: ${homophones.map(h =>
+            `<span class="homo">${h.hanzi} (${h.pinyin})</span>`
+          ).join(" ")}
+        </div>
+      </div>
+    `
+    : "";
+
+  app.innerHTML = `
+    <div class="fixed-bottom">
+      <button class="back-btn" onclick="${"location.hash='#'"}">←</button>
+      <button class="ignore-btn" onclick="removeCharFromUiAndSrs('${c.hanzi}', { mode: 'custom', index: ${index} })">-</button>
+      ${
+        !isLast
+          ? `<button class="next-btn" onclick="location.hash='#/custom/${index + 1}'">→</button>`
+          : `<button class="next-btn" onclick="location.hash='#'">✓</button>`
+      }
+      <button id="example-open-btn" class="example-open-btn">↓</button>
+    </div>
+
+    <h1>Custom</h1>
+
+    <div class="char-card custom-study-card">
+      <div class="progress">${index + 1} / ${chars.length}</div>
+      <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
+
+      <div style="display:flex; gap:20px; justify-content:center;">
+        <button id="toggle-meaning" class="secondary-btn">Pinying</button>
+        <button id="incremental-reveal-pinyin" class="secondary-btn">+</button>
+      </div>
+
+      <div id="toggle-pinyin" style="display: none;">
+        <div class="pinyin-row">
+          <p class="pinyin">${c.pinyin}</p>
+        </div>
+      </div>
+
+      <div class="example-section">
+        <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi || c.hanzi}')">${c.example_hanzi || c.hanzi}</p>
+        <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying || ""}</p>
+        <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru || ""}</p>
+      </div>
+
+      <div id="meaning" style="display:none">
+        <div class="section">
+          Перевод: ${ [...(c.ru_translations || []).slice(0, 3), ...(c.translations || []).slice(0, 3)].join(", ") }
+        </div>
+
+        ${homophonesHtml}
+
+        <h1>Deepseek</h1>
+
+        <p class="section">${c.deepseek_description_pl_paragraph_1 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_2 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_3 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_4 || ""}</p>
+
+        <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🧭</button>
+        <button class="chatgpt-btn" onclick="explainInChatGPT('${c.hanzi}')">💬</button>
+      </div>
+    </div>
+  `;
+
+  const openExampleBtn = document.getElementById("example-open-btn");
+  const toggleBtn = document.getElementById("toggle-meaning");
+  const meaning = document.getElementById("meaning");
+  const pinyin = document.getElementById("toggle-pinyin");
+
+  const incrementalRevealBtn = document.getElementById("incremental-reveal-pinyin");
+  const pinyinTextEl = pinyin.querySelector(".pinyin");
+  const fullPinyin = c.pinyin || "";
+
+  let revealIndex = 0;
+  let clicks = 0;
+
+  toggleBtn.onclick = () => {
+    clicks++;
+    if (clicks == 1) {
+      speak(c.hanzi);
+      incrementalRevealBtn.style.display = 'none';
+      pinyin.style.display = "block";
+      toggleBtn.textContent = "Open";
+      toggleBtn.style.width = '100%';
+      pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
+    }
+    if (clicks == 2) {
+      toggleBtn.style.display = 'none';
+      meaning.style.display = "block";
+      openExampleBtn.click();
+      openExampleBtn.click();
+    }
+  };
+
+  incrementalRevealBtn.onclick = () => {
+    if (!fullPinyin) return;
+
+    if (revealIndex === 0) {
+      pinyin.style.display = "block";
+      pinyinTextEl.textContent = maskedPinyin(fullPinyin, 0);
+      revealIndex = 1;
+      return;
+    }
+
+    pinyinTextEl.textContent = maskedPinyin(fullPinyin, revealIndex);
+    revealIndex++;
+
+    if (revealIndex > fullPinyin.length) {
+      incrementalRevealBtn.style.display = "none";
+      toggleBtn.click();
+    }
+  };
+
+  const examplePinying = document.getElementById("example-p-pinying");
+  const exampleRu = document.getElementById("example-p-ru");
+  let exampleOpenClicks = 0;
+
+  document.addEventListener("click", (e) => {
+    if (!e.target || e.target.id !== "example-open-btn") return;
+
+    exampleOpenClicks++;
+    if (exampleOpenClicks == 1) {
+      examplePinying.style.visibility = "visible";
+    }
+    if (exampleOpenClicks == 2) {
+      exampleRu.style.visibility = "visible";
+      openExampleBtn.style.display = 'none';
+    }
+  });
+
+  incrementalRevealBtn.click();
+}
+
 function renderLevel(level, index = 0) {
   const chars = getCharsForLevel(level);
   const c = chars[index];
@@ -556,7 +994,7 @@ function renderLevel(level, index = 0) {
         isIgnoredFromSrs(c.hanzi)
         ? ""
         :
-          `<button class="ignore-btn" onclick="ignoreCharFromSrs('${c.hanzi}');renderLevel(${level}, ${index})">
+          `<button class="ignore-btn" onclick="removeCharFromUiAndSrs('${c.hanzi}', { mode: 'level', level: ${level}, index: ${index} })">
             -
           </button>`
       }
@@ -702,18 +1140,9 @@ function ignoreCurrentSrsChar() {
   if (!session) return;
 
   const c = session.chars[session.index];
+  if (!c) return;
 
-  ignoreCharFromSrs(c.hanzi);
-
-  // сразу убираем из текущей сессии
-  session.chars.splice(session.index, 1);
-
-  if (session.index >= session.chars.length) {
-    finishSrsSession();
-  } else {
-    localStorage.setItem("srsSession", JSON.stringify(session));
-    renderSrs();
-  }
+  removeCharFromUiAndSrs(c.hanzi, { mode: "srs" });
 }
 
 function googleHanzi(hanzi) {
@@ -922,9 +1351,11 @@ function toggleHomoList() {
     homoList.innerHTML = renderHomoList();
   }
   const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
 
   homoList.style.display = homoList.style.display === "none" ? "block" : "none";
   path.style.display = homoList.style.display === "none" ? "block" : "none";
+  customs.style.display = homoList.style.display === "none" ? "block" : "none";
 
   collapseAllHomoGroups();
 }

@@ -43,7 +43,6 @@ html, body {
 .path {
   display: flex;
   flex-direction: column;
-  gap: 24px;
   width: 100%;
   padding-bottom: 500px;
 }
@@ -51,6 +50,7 @@ html, body {
 .row {
   display: flex;
   width: 100%;
+  margin-top: 10px;
 }
 
 .row.forward {
@@ -388,3 +388,44 @@ button.completed .level-number{
   white-space: nowrap;
   width: 100%;
 }
+
+.custom-hanzi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.custom-hanzi-card {
+  min-height: 180px;
+  height: auto;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #7f5a00, #303030);
+  border: 2px solid #f1c40f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-hanzi-main {
+  font-size: 90px;
+  line-height: 1;
+}
+
+.custom-hanzi-pinyin {
+  font-size: 40px;
+  opacity: 0.85;
+  margin-top: 12px;
+}
+
+.custom-hanzi-input-btn {
+  width: 20%;
+  margin-left: 20px;
+}
+
+.custom-hanzi-status {
+  font-size: 40px;
+  margin-top: 20px;
+  color: #f1c40f;
+}
+
