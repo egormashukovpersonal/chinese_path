@@ -113,7 +113,7 @@ function getHumanSrsLimit() {
 
 function getSrsLimit() {
   const progress = getProgress();
-  return progress.settings?.srsLimit || 10;
+  return progress.settings?.srsLimit || 9999999;
 }
 
 function setSrsLimit(value) {
@@ -155,7 +155,7 @@ function renderPath() {
       <button id='srs-btn' onclick='startSrsSession()'>SRS</button>
       <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
       <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
-      <button class="srs-size-btn" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
+      <button class="srs-size-btn" style="display: none" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
     </div>
@@ -592,10 +592,10 @@ function renderLevel(level, index = 0) {
 
         <h1>Deepseek</h1>
 
-        <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
-        <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
-        <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
-        <p class="section">${c.deepseek_description_paragraph_4 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_1 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_2 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_3 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_4 || ""}</p>
 
         <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🧭</button>
         <button class="chatgpt-btn" onclick="explainInChatGPT('${c.hanzi}')">💬</button>
@@ -788,10 +788,10 @@ function renderSrs() {
 
         <h1>Deepseek</h1>
 
-        <p class="section">${c.deepseek_description_paragraph_1 || ""}</p>
-        <p class="section">${c.deepseek_description_paragraph_2 || ""}</p>
-        <p class="section">${c.deepseek_description_paragraph_3 || ""}</p>
-        <p class="section">${c.deepseek_description_paragraph_4 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_1 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_2 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_3 || ""}</p>
+        <p class="section">${c.deepseek_description_pl_paragraph_4 || ""}</p>
 
         <button class="google-btn" onclick="googleHanzi('${c.hanzi}')">🧭</button>
         <button class="chatgpt-btn" onclick="explainInChatGPT('${c.hanzi}')">💬</button>
