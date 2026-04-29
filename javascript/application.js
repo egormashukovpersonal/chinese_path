@@ -552,6 +552,9 @@ function renderLevel(level, index = 0) {
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="back-btn" onclick="goBack(${level}, ${index})">←</button>
+      <button class="ignore-btn" onclick="ignoreCharFromSrs('${c.hanzi}');">
+        -
+      </button>
       ${
         !isLast
           ? `<button class="next-btn" onclick="location.hash='#/level/${level}/${index + 1}'">→</button>`
