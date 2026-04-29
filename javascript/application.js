@@ -143,25 +143,6 @@ ru_translations:
 - если возможно — один перевод
 - не дублируй синонимы
 
-deepseek_description_paragraph_1:
-- общее понятное объяснение иероглифа
-- что он означает в современном языке
-
-deepseek_description_paragraph_2:
-- внимательный разбор структуры иероглифа
-- если иероглиф составной — объясни каждый компонент, включая вложенные компоненты вроде 口 внутри 各
-- если есть радикал — упомяни его роль
-- не выдумывай мнемонику, если структура исторически не прозрачна
-
-deepseek_description_paragraph_3:
-- как и где иероглиф обычно используется
-- устойчивые контексты, оттенки значения
-
-deepseek_description_paragraph_4:
-- краткий культурный или исторический аспект
-- ТОЛЬКО если он реально уместен
-- без эзотерики и надуманных обобщений
-
 pl_translations:
 - массив из 1–2 кратких переводов по польски
 - если возможно — один перевод
@@ -285,15 +266,15 @@ function removeCharFromUiAndSrs(hanzi, options = {}) {
 
   HOMOPHONES_INDEX = null;
 
-  if (options.mode === "custom") {
-    renderCustomChar(options.index || 0);
-    return;
-  }
+  // if (options.mode === "custom") {
+  //   renderCustomChar(options.index || 0);
+  //   return;
+  // }
 
-  if (options.mode === "level") {
-    renderLevel(options.level, options.index);
-    return;
-  }
+  // if (options.mode === "level") {
+  //   renderLevel(options.level, options.index);
+  //   return;
+  // }
 
   if (options.mode === "srs") {
     renderSrs();
@@ -471,9 +452,22 @@ function renderPath() {
 
     direction = direction === "forward" ? "backward" : "forward";
   }
+
+  const savedScroll = localStorage.getItem("pathScroll");
+  if (savedScroll !== null) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, parseInt(savedScroll, 10));
+      });
+    });
+  }
 }
 
-
+function savePathScroll() {
+  if (!location.hash || location.hash === "#") {
+    localStorage.setItem("pathScroll", String(window.scrollY));
+  }
+}
 function renderCustomHanziList() {
   const container = document.getElementById("custom-hanzi-list");
   if (!container) return;
@@ -488,7 +482,7 @@ function renderCustomHanziList() {
   container.innerHTML = `
     <div class="custom-hanzi-grid">
       ${customChars.map((c, index) => `
-        <button class="custom-hanzi-card" onclick="location.hash='#/custom/${index}'">
+        <button class="custom-hanzi-card" onclick="savePathScroll(); location.hash='#/custom/${index}'">
           <span class="custom-hanzi-main">${c.hanzi}</span>
           ${usePinyin ? `<span class="custom-hanzi-pinyin">${c.pinyin || ""}</span>` : ""}
         </button>
@@ -588,6 +582,7 @@ function createRowFromLevels(container, direction, levels) {
       btn.disabled = true;
     } else {
       btn.onclick = () => {
+        savePathScroll();
         location.hash = `/level/${lvl}`;
         window.location.reload();
       };
@@ -651,6 +646,7 @@ function createRow(container, direction, start, end) {
       btn.disabled = true;
     } else {
       btn.onclick = () => {
+        savePathScroll();
         location.hash = `/level/${lvl}`;
         window.location.reload();
       };
@@ -752,6 +748,7 @@ function createTurn(container, direction, startLevel) {
       btn.disabled = true;
     } else {
       btn.onclick = () => {
+        savePathScroll();
         location.hash = `/level/${lvl}`;
         window.location.reload();
       };
@@ -792,7 +789,7 @@ function getHanziPreviewForLevel(level) {
       usePinyin
         ? `<div>
              <div>${c.hanzi}</div>
-             <div>${c.pinyin}</div>
+             <div class='preview-pinyin'>${c.pinyin}</div>
              ${i < filtered.length - 1 ? '<hr>' : ''}
            </div>`
         : `<div>${c.hanzi}</div>`
@@ -844,6 +841,8 @@ function renderCustomChar(index = 0) {
       </div>
     `
     : "";
+  // <h1>Custom</h1>
+  // <div class="progress">${index + 1} / ${chars.length}</div>
 
   app.innerHTML = `
     <div class="fixed-bottom">
@@ -857,10 +856,8 @@ function renderCustomChar(index = 0) {
       <button id="example-open-btn" class="example-open-btn">↓</button>
     </div>
 
-    <h1>Custom</h1>
 
     <div class="char-card custom-study-card">
-      <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
@@ -987,6 +984,9 @@ function renderLevel(level, index = 0) {
     `
     : "";
 
+  // <h1>Level ${level}</h1>
+  // <div class="progress">${index + 1} / ${chars.length}</div>
+
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="back-btn" onclick="goBack(${level}, ${index})">←</button>
@@ -1006,10 +1006,8 @@ function renderLevel(level, index = 0) {
       <button id="example-open-btn" class="example-open-btn">↓</button>
     </div>
 
-    <h1>Level ${level}</h1>
 
     <div class="char-card">
-      <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
@@ -1184,6 +1182,8 @@ function renderSrs() {
     `
     : "";
 
+  // <div class="progress">${index + 1} / ${chars.length}</div>
+
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="back-btn" onclick="location.hash = '#';">←</button>
@@ -1196,7 +1196,6 @@ function renderSrs() {
       <button id="example-open-btn" class="example-open-btn">↓</button>
     </div>
     <div class="char-card">
-      <div class="progress">${index + 1} / ${chars.length}</div>
       <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">

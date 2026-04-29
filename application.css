@@ -333,7 +333,7 @@ h1 {
   width: 100%;
   background: #212121;
   z-index: 99;
-  bottom: 0;
+  bottom: -1px;
   left: 0px;
   padding-bottom: 120px;
   padding-top: 20px;
@@ -355,7 +355,7 @@ button.completed .level-number{
 }
 
 .level-hanzi {
-  font-size: 60px;
+  font-size: 80px;
   margin-top: 0px;
   padding: 0 3px;
 }
@@ -393,6 +393,7 @@ button.completed .level-number{
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
+  margin-bottom: 10px;
 }
 
 .custom-hanzi-card {
@@ -405,17 +406,21 @@ button.completed .level-number{
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: 4px;
 }
 
 .custom-hanzi-main {
-  font-size: 90px;
+  font-size: 80px;
   line-height: 1;
 }
 
 .custom-hanzi-pinyin {
-  font-size: 40px;
+  font-size: 45px;
   opacity: 0.85;
   margin-top: 12px;
+}
+.preview-pinyin {
+  font-size: 45px;
 }
 
 .custom-hanzi-input-btn {
