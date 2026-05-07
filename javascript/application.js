@@ -1,4 +1,4 @@
-const LEVELS_PER_ROW = 5;
+const LEVELS_PER_ROW = 6;
 const TURN_LENGTH = 0;
 const CHARS_PER_LEVEL = 1;
 const CUSTOM_HANZI_START_ID = 100000;
@@ -392,6 +392,7 @@ function renderPath() {
       <button class="srs-size-btn" style="display: none" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
+      <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
@@ -483,8 +484,8 @@ function renderCustomHanziList() {
     <div class="custom-hanzi-grid">
       ${customChars.map((c, index) => `
         <button class="custom-hanzi-card" onclick="savePathScroll(); location.hash='#/custom/${index}'">
-          <span class="custom-hanzi-main">${c.hanzi}</span>
-          ${usePinyin ? `<span class="custom-hanzi-pinyin">${c.pinyin || ""}</span>` : ""}
+          <span class="custom-hanzi-main">${renderToneColoredHanzi(c.hanzi, c.pinyin)}</span>
+          ${usePinyin ? `<span class="custom-hanzi-pinyin">${renderToneColoredPinyin(c.hanzi, c.pinyin || "")}</span>` : ""}
         </button>
       `).join("")}
     </div>
@@ -788,11 +789,11 @@ function getHanziPreviewForLevel(level) {
   return filtered.map((c, i) =>
       usePinyin
         ? `<div>
-             <div>${c.hanzi}</div>
-             <div class='preview-pinyin'>${c.pinyin}</div>
+             <div>${renderToneColoredHanzi(c.hanzi, c.pinyin)}</div>
+             <div class='preview-pinyin'>${renderToneColoredPinyin(c.hanzi, c.pinyin)}</div>
              ${i < filtered.length - 1 ? '<hr>' : ''}
            </div>`
-        : `<div>${c.hanzi}</div>`
+        : `<div>${renderToneColoredHanzi(c.hanzi, c.pinyin)}</div>`
     )
     .join(sep);
 }
@@ -994,7 +995,7 @@ function renderLevel(level, index = 0) {
         isIgnoredFromSrs(c.hanzi)
         ? ""
         :
-          `<button class="ignore-btn" onclick="removeCharFromUiAndSrs('${c.hanzi}', { mode: 'level', level: ${level}, index: ${index} })">
+          `<button class="ignore-btn" onclick="finishLevel(${level});removeCharFromUiAndSrs('${c.hanzi}', { mode: 'level', level: ${level}, index: ${index} })">
             -
           </button>`
       }
@@ -1640,8 +1641,258 @@ function normalizeForSort(word) {
   return word
 }
 
+function useToneColors() {
+  return localStorage.getItem("useToneColors") === "true";
+}
+
+function toggleToneColors() {
+  const next = !useToneColors();
+  localStorage.setItem("useToneColors", String(next));
+
+  router();
+}
+function detectTone(pinyin) {
+  if (!pinyin) return 5;
+
+  if (/[āēīōūǖ]/.test(pinyin)) return 1;
+  if (/[áéíóúǘ]/.test(pinyin)) return 2;
+  if (/[ǎěǐǒǔǚ]/.test(pinyin)) return 3;
+  if (/[àèìòùǜ]/.test(pinyin)) return 4;
+
+  return 5;
+}
+function renderToneColoredHanzi(hanzi, pinyin) {
+  if (!useToneColors()) {
+    return hanzi;
+  }
+
+  const parts = splitHanziAndPinyin(hanzi, pinyin);
+
+  return parts.map(part => {
+    const tone = detectTone(part.pinyin);
+
+    return `
+      <span class="tone-char tone-${tone}">
+        ${part.hanzi}
+      </span>
+    `;
+  }).join("");
+}
+
+function renderToneColoredPinyin(hanzi, pinyin) {
+  if (!useToneColors()) {
+    return pinyin;
+  }
+
+  const parts = splitHanziAndPinyin(hanzi, pinyin);
+
+  return parts.map(part => {
+    const tone = detectTone(part.pinyin);
+
+    return `
+      <span class="tone-char tone-${tone}">
+        ${part.pinyin}
+      </span>
+    `;
+  }).join("");
+}
+
+
 (async function init() {
   await loadHSK();
+
+  if (false) {
+    const existingCustoms = getCustomChars();
+
+    if (existingCustoms.length === 0) {
+      restoreProgressToLevel(20)
+      saveCustomChars([
+        {
+          id: 100001,
+          custom: true,
+          hanzi: "妈",
+          pinyin: "mā",
+          translations: ["mom"],
+          ru_translations: ["мама"],
+          pl_translations: ["mama"]
+        },
+        {
+          id: 100002,
+          custom: true,
+          hanzi: "麻",
+          pinyin: "má",
+          translations: ["hemp"],
+          ru_translations: ["конопля"],
+          pl_translations: ["konopie"]
+        },
+        {
+          id: 100003,
+          custom: true,
+          hanzi: "马",
+          pinyin: "mǎ",
+          translations: ["horse"],
+          ru_translations: ["лошадь"],
+          pl_translations: ["koń"]
+        },
+        {
+          id: 100004,
+          custom: true,
+          hanzi: "骂",
+          pinyin: "mà",
+          translations: ["scold"],
+          ru_translations: ["ругать"],
+          pl_translations: ["besztać"]
+        },
+        {
+          id: 100005,
+          custom: true,
+          hanzi: "吗",
+          pinyin: "ma",
+          translations: ["question particle"],
+          ru_translations: ["частица"],
+          pl_translations: ["partykuła"]
+        },
+
+        {
+          id: 100006,
+          custom: true,
+          hanzi: "天",
+          pinyin: "tiān",
+          translations: ["sky"],
+          ru_translations: ["небо"],
+          pl_translations: ["niebo"]
+        },
+        {
+          id: 100007,
+          custom: true,
+          hanzi: "田",
+          pinyin: "tián",
+          translations: ["field"],
+          ru_translations: ["поле"],
+          pl_translations: ["pole"]
+        },
+        {
+          id: 100008,
+          custom: true,
+          hanzi: "舔",
+          pinyin: "tiǎn",
+          translations: ["lick"],
+          ru_translations: ["лизать"],
+          pl_translations: ["lizać"]
+        },
+        {
+          id: 100009,
+          custom: true,
+          hanzi: "跳",
+          pinyin: "tiào",
+          translations: ["jump"],
+          ru_translations: ["прыгать"],
+          pl_translations: ["skakać"]
+        },
+        {
+          id: 100010,
+          custom: true,
+          hanzi: "的",
+          pinyin: "de",
+          translations: ["possessive particle"],
+          ru_translations: ["частица"],
+          pl_translations: ["partykuła"]
+        },
+
+        {
+          id: 100011,
+          custom: true,
+          hanzi: "东",
+          pinyin: "dōng",
+          translations: ["east"],
+          ru_translations: ["восток"],
+          pl_translations: ["wschód"]
+        },
+        {
+          id: 100012,
+          custom: true,
+          hanzi: "懂",
+          pinyin: "dǒng",
+          translations: ["understand"],
+          ru_translations: ["понимать"],
+          pl_translations: ["rozumieć"]
+        },
+        {
+          id: 100013,
+          custom: true,
+          hanzi: "动",
+          pinyin: "dòng",
+          translations: ["move"],
+          ru_translations: ["двигаться"],
+          pl_translations: ["ruszać się"]
+        },
+        {
+          id: 100014,
+          custom: true,
+          hanzi: "都",
+          pinyin: "dōu",
+          translations: ["all"],
+          ru_translations: ["все"],
+          pl_translations: ["wszyscy"]
+        },
+        {
+          id: 100015,
+          custom: true,
+          hanzi: "读",
+          pinyin: "dú",
+          translations: ["read"],
+          ru_translations: ["читать"],
+          pl_translations: ["czytać"]
+        },
+
+        {
+          id: 100016,
+          custom: true,
+          hanzi: "花",
+          pinyin: "huā",
+          translations: ["flower"],
+          ru_translations: ["цветок"],
+          pl_translations: ["kwiat"]
+        },
+        {
+          id: 100017,
+          custom: true,
+          hanzi: "滑",
+          pinyin: "huá",
+          translations: ["slippery"],
+          ru_translations: ["скользкий"],
+          pl_translations: ["ślizgi"]
+        },
+        {
+          id: 100018,
+          custom: true,
+          hanzi: "话",
+          pinyin: "huà",
+          translations: ["speech"],
+          ru_translations: ["речь"],
+          pl_translations: ["mowa"]
+        },
+        {
+          id: 100019,
+          custom: true,
+          hanzi: "火",
+          pinyin: "huǒ",
+          translations: ["fire"],
+          ru_translations: ["огонь"],
+          pl_translations: ["ogień"]
+        },
+        {
+          id: 100020,
+          custom: true,
+          hanzi: "灰",
+          pinyin: "huī",
+          translations: ["gray"],
+          ru_translations: ["серый"],
+          pl_translations: ["szary"]
+        }
+      ]);
+    }
+  }
   router();
 
   document.addEventListener("click", function (e) {

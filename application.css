@@ -70,7 +70,7 @@ html, body {
 }
 
 .cell {
-  flex: 0 0 20%;
+  flex: 0 0 17%;
   padding: 0 4px;
   box-sizing: border-box;
 }
@@ -184,7 +184,7 @@ button {
 }
 
 button.completed {
-  background: #2ecc71;
+  background: white;
   color: #000;
   border: none;
 }
@@ -211,7 +211,7 @@ button.locked {
 }
 #speak-mute-btn {
   background: none !important;
-  width: 7%;
+  width: 10%;
   margin-left: 20px;
   border: none !important;
   font-size: 70px;
@@ -220,16 +220,15 @@ button.locked {
 .homo-toggle {
   border: none !important;
   font-size: 70px;
-  background: #303030 !important;
-  width: 15%;
+  background: none;
+  width: 10%;
   border-radius: 20px;
 }
-
 .dev-toggle {
-  background: none !important;
-  width: 7%;
+  background: none;
+  width: 10%;
   border: none !important;
-  font-size: 70px;
+  font-size: 100px;
 }
 
 .line-break-toggle {
@@ -250,8 +249,8 @@ button.locked {
 .pinyin-toggle {
   border: none !important;
   font-size: 70px;
-  background: #303030 !important;
-  width: 15%;
+  background: none;
+  width: 10%;
   border-radius: 20px;
 }
 
@@ -279,10 +278,6 @@ button.locked {
   margin-bottom: 10px;
 }
 
-.dev-toggle {
-  background: none;
-  cursor: pointer;
-}
 .srs-size-btn {
   width: 10%;
   background: none !important;
@@ -355,13 +350,14 @@ button.completed .level-number{
 }
 
 .level-hanzi {
-  font-size: 80px;
+  font-size: 90px;
+  font-weight: 500;
   margin-top: 0px;
-  padding: 0 3px;
+  padding: 0;
 }
 
 #homo-list {
-  margin-bottom: 150px;
+  margin-bottom: 500px;
 }
 
 .homo-row {
@@ -391,22 +387,24 @@ button.completed .level-number{
 
 .custom-hanzi-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .custom-hanzi-card {
   min-height: 180px;
   height: auto;
   border-radius: 24px;
-  background: linear-gradient(135deg, #7f5a00, #303030);
-  border: 2px solid #f1c40f;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   margin: 4px;
+  background: white;
+  color: black;
+  font-size: 90px;
+  font-weight: 500;
 }
 
 .custom-hanzi-main {
@@ -420,7 +418,7 @@ button.completed .level-number{
   margin-top: 12px;
 }
 .preview-pinyin {
-  font-size: 45px;
+  font-size: 50px;
 }
 
 .custom-hanzi-input-btn {
@@ -432,5 +430,33 @@ button.completed .level-number{
   font-size: 40px;
   margin-top: 20px;
   color: #f1c40f;
+}
+
+.tone-1 {
+  color: #4da3ff;
+}
+
+.tone-2 {
+  color: forestgreen;
+}
+
+.tone-3 {
+  color: darkorange;
+}
+
+.tone-4 {
+  color: #ff5a5a;
+}
+
+.tone-5 {
+  color: black;
+}
+
+.tone-toggle {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 10%;
+  border-radius: 20px;
 }
 
