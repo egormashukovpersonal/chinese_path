@@ -25,6 +25,21 @@ async function loadHSK() {
   HSK = [...hsk1, ...hsk2];
 }
 
+let PINYIN_DB = {};
+async function loadPinyinDb() {
+  const res = await fetch("./data/pinyin_db.json");
+  PINYIN_DB = await res.json();
+}
+
+function getCharPinyin(char) {
+  const list = PINYIN_DB[char];
+
+  if (!list || !list.length) {
+    return "";
+  }
+
+  return list[0];
+}
 
 const app = document.getElementById("app");
 
@@ -393,10 +408,12 @@ function renderPath() {
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
       <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
+      <button class="examples-toggle" onclick="toggleExamplesList()">📖</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
     <div id="homo-list" style="display:none"></div>
+    <div id="examples-list" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
       <h1>Open levels til</h1>
@@ -484,7 +501,7 @@ function renderCustomHanziList() {
     <div class="custom-hanzi-grid">
       ${customChars.map((c, index) => `
         <button class="custom-hanzi-card" onclick="savePathScroll(); location.hash='#/custom/${index}'">
-          <span class="custom-hanzi-main">${renderToneColoredHanzi(c.hanzi, c.pinyin)}</span>
+          <span class="custom-hanzi-main">${renderToneColoredHanzi(c.hanzi)}</span>
           ${usePinyin ? `<span class="custom-hanzi-pinyin">${renderToneColoredPinyin(c.hanzi, c.pinyin || "")}</span>` : ""}
         </button>
       `).join("")}
@@ -693,9 +710,22 @@ function getAllLearnedCharsWithIgnored() {
     chars.push(...getCharsForLevel(level));
   });
 
+  // custom chars
   chars.push(...getCustomChars());
 
-  return chars;
+  // dedupe by hanzi
+  const seen = new Set();
+
+  return chars.filter(c => {
+    if (!c?.hanzi) return false;
+
+    if (seen.has(c.hanzi)) {
+      return false;
+    }
+
+    seen.add(c.hanzi);
+    return true;
+  });
 }
 
 
@@ -789,11 +819,11 @@ function getHanziPreviewForLevel(level) {
   return filtered.map((c, i) =>
       usePinyin
         ? `<div>
-             <div>${renderToneColoredHanzi(c.hanzi, c.pinyin)}</div>
+             <div>${renderToneColoredHanzi(c.hanzi)}</div>
              <div class='preview-pinyin'>${renderToneColoredPinyin(c.hanzi, c.pinyin)}</div>
              ${i < filtered.length - 1 ? '<hr>' : ''}
            </div>`
-        : `<div>${renderToneColoredHanzi(c.hanzi, c.pinyin)}</div>`
+        : `<div>${renderToneColoredHanzi(c.hanzi)}</div>`
     )
     .join(sep);
 }
@@ -1647,9 +1677,13 @@ function useToneColors() {
 
 function toggleToneColors() {
   const next = !useToneColors();
-  localStorage.setItem("useToneColors", String(next));
 
-  router();
+  localStorage.setItem(
+    "useToneColors",
+    String(next)
+  );
+
+  repaintToneColors();
 }
 function detectTone(pinyin) {
   if (!pinyin) return 5;
@@ -1661,47 +1695,151 @@ function detectTone(pinyin) {
 
   return 5;
 }
-function renderToneColoredHanzi(hanzi, pinyin) {
-  if (!useToneColors()) {
-    return hanzi;
-  }
 
-  const parts = splitHanziAndPinyin(hanzi, pinyin);
-
-  return parts.map(part => {
-    const tone = detectTone(part.pinyin);
+function renderToneColoredHanzi(hanzi) {
+  return [...hanzi].map(char => {
+    const pinyin = getCharPinyin(char);
+    const tone = detectTone(pinyin);
 
     return `
-      <span class="tone-char tone-${tone}">
-        ${part.hanzi}
+      <span
+        class="tone-char ${useToneColors() ? `tone-${tone}` : ""}"
+        data-hanzi="${char}"
+      >
+        ${char}
       </span>
     `;
   }).join("");
+}
+function repaintToneColors() {
+  const enabled = useToneColors();
+
+  const classes = [
+    "tone-1",
+    "tone-2",
+    "tone-3",
+    "tone-4",
+    "tone-5"
+  ];
+
+  document.querySelectorAll(".tone-char").forEach(el => {
+    const char = el.dataset.hanzi;
+
+    el.classList.remove(...classes);
+
+    if (!enabled) return;
+
+    const pinyin = getCharPinyin(char);
+    const tone = detectTone(pinyin);
+
+    el.classList.add(`tone-${tone}`);
+  });
+
+  document.querySelectorAll(".pinyin-tone").forEach(el => {
+    const tone = el.dataset.tone;
+
+    el.classList.remove(...classes);
+
+    if (!enabled) return;
+
+    el.classList.add(`tone-${tone}`);
+  });
+}
+function toggleExamplesList() {
+  const examplesList = document.getElementById("examples-list");
+
+  if (!examplesList.innerHTML) {
+    examplesList.innerHTML = renderExamplesList();
+  }
+
+  const isOpening = examplesList.style.display === "none";
+
+  examplesList.style.display = isOpening ? "block" : "none";
+
+  const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
+  const homo = document.getElementById("homo-list");
+
+  if (path) path.style.display = isOpening ? "none" : "block";
+  if (customs) customs.style.display = isOpening ? "none" : "block";
+  if (homo) homo.style.display = "none";
+}
+
+function renderExamplesList() {
+  const chars = getAllLearnedCharsWithIgnored();
+
+  return chars
+    .filter(c => c.example_hanzi)
+    .map((c, index) => `
+      <div class="example-row">
+        <div class="example-header" onclick="toggleExampleDetails(${index})">
+          <div
+            class="example-hanzi"
+            onclick="event.stopPropagation(); speak('${c.example_hanzi}')"
+          >
+            ${renderToneColoredHanzi(c.example_hanzi)}
+          </div>
+
+          <div class="example-arrow" id="example-arrow-${index}">
+            ◀
+          </div>
+
+        </div>
+
+        <div class="example-details" id="example-details-${index}">
+          <div class="example-pinyin">
+            ${c.example_pinying || ""}
+          </div>
+
+          <div class="example-ru">
+            ${c.example_ru || ""}
+          </div>
+        </div>
+      </div>
+    `)
+    .join("");
+}
+
+function toggleExampleDetails(index) {
+  const details = document.getElementById(`example-details-${index}`);
+  const arrow = document.getElementById(`example-arrow-${index}`);
+
+  const isOpen = details.classList.contains("open");
+
+  details.classList.toggle("open");
+
+  arrow.textContent = isOpen ? "◀" : "▼";
 }
 
 function renderToneColoredPinyin(hanzi, pinyin) {
-  if (!useToneColors()) {
-    return pinyin;
-  }
+  const chars = [...hanzi];
+  const pinyinParts = pinyin.trim().split(/\s+/);
 
-  const parts = splitHanziAndPinyin(hanzi, pinyin);
+  return pinyinParts.map((part, index) => {
+    const char = chars[index];
 
-  return parts.map(part => {
-    const tone = detectTone(part.pinyin);
+    const dbPinyin =
+      getCharPinyin(char) || part;
+
+    const tone = detectTone(dbPinyin);
 
     return `
-      <span class="tone-char tone-${tone}">
-        ${part.pinyin}
+      <span
+        class="pinyin-tone ${useToneColors() ? `tone-${tone}` : ""}"
+        data-tone="${tone}"
+      >
+        ${part}
       </span>
     `;
-  }).join("");
+  }).join(" ");
 }
-
-
 (async function init() {
-  await loadHSK();
+  await Promise.all([
+    loadHSK(),
+    loadPinyinDb()
+  ]);
 
-  if (false) {
+  if (true) {
     const existingCustoms = getCustomChars();
 
     if (existingCustoms.length === 0) {

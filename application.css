@@ -33,7 +33,7 @@ html, body {
   box-shadow: 0 6px 14px rgba(0,0,0,0.25);
   margin-bottom: 20px;
   margin-right: 20px;
-  width: 30%;
+  width: 25%;
 }
 .back-btn {
   width: 20%;
@@ -77,8 +77,9 @@ html, body {
 
 .cell button {
   min-height: 185px;
-  border-radius: 20px;
+  border-radius: 0px;
   height: auto;
+  padding: 0;
 }
 .cell hr {
   border: 1px solid black;
@@ -222,7 +223,6 @@ button.locked {
   font-size: 70px;
   background: none;
   width: 10%;
-  border-radius: 20px;
 }
 .dev-toggle {
   background: none;
@@ -251,7 +251,6 @@ button.locked {
   font-size: 70px;
   background: none;
   width: 10%;
-  border-radius: 20px;
 }
 
 #srs-calendar h1 {
@@ -350,7 +349,7 @@ button.completed .level-number{
 }
 
 .level-hanzi {
-  font-size: 90px;
+  font-size: 130px;
   font-weight: 500;
   margin-top: 0px;
   padding: 0;
@@ -389,13 +388,13 @@ button.completed .level-number{
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .custom-hanzi-card {
   min-height: 180px;
   height: auto;
-  border-radius: 24px;
+  border-radius: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -403,12 +402,12 @@ button.completed .level-number{
   margin: 4px;
   background: white;
   color: black;
-  font-size: 90px;
+  font-size: 130px;
   font-weight: 500;
 }
 
 .custom-hanzi-main {
-  font-size: 80px;
+  font-size: 130px;
   line-height: 1;
 }
 
@@ -460,3 +459,65 @@ button.completed .level-number{
   border-radius: 20px;
 }
 
+.examples-toggle {
+  border: none !important;
+  font-size: 80px;
+  background: none;
+  width: 12%;
+  border-radius: 20px;
+}
+
+#examples-list {
+  margin-bottom: 500px;
+}
+
+.example-row {
+  border-bottom: 1px solid #333;
+  margin: 25px;
+  background: white;
+  color: black;
+}
+.example-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  cursor: pointer;
+}
+
+.example-arrow {
+  width: 120px;
+  min-width: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 70px;
+}
+
+.example-hanzi {
+  font-size: 130px;
+  line-height: 1.1;
+}
+
+.example-details {
+  display: none;
+  margin-left: 90px;
+  margin-top: 20px;
+}
+
+.example-details.open {
+  display: block;
+}
+
+.example-pinyin {
+  font-size: 70px;
+  margin-bottom: 10px;
+}
+
+.example-ru {
+  font-size: 55px;
+}
+.tone-char {
+    line-height: 130px;
+}
