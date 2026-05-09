@@ -485,7 +485,14 @@ function renderPath() {
   const totalLevels = Math.ceil(maxId / CHARS_PER_LEVEL);
 
   const visibleLevels = [];
+  const nextAvailable = getNextAvailableLevel();
+  const maxVisibleLevel = nextAvailable + 60;
+
   for (let lvl = 1; lvl <= totalLevels; lvl++) {
+    if (lvl > maxVisibleLevel) {
+      break;
+    }
+
     if (!isLevelEmpty(lvl)) {
       visibleLevels.push(lvl);
     }
