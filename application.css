@@ -468,6 +468,7 @@ button.completed .level-number{
 }
 
 #examples-list {
+  user-select: all;
   margin-bottom: 500px;
 }
 
@@ -476,6 +477,7 @@ button.completed .level-number{
   margin: 25px;
   background: white;
   color: black;
+  user-select: all;
 }
 .example-header {
   display: flex;
