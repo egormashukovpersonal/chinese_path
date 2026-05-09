@@ -2085,10 +2085,7 @@ function renderGeneratedList() {
               >
 
                 <div class="example-pinyin">
-                  ${renderToneColoredPinyin(
-                    c.hanzi,
-                    c.pinying
-                  )}
+                  ${c.pinying}
                 </div>
 
                 <div class="example-ru">
@@ -2110,7 +2107,7 @@ function renderGeneratedList() {
     loadPinyinDb()
   ]);
 
-  if (false) {
+  if (true) {
     const existingCustoms = getCustomChars();
 
     if (existingCustoms.length === 0) {
