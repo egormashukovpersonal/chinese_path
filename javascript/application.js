@@ -101,7 +101,7 @@ function saveCustomChars(chars) {
 }
 
 function getDeepSeekApiKey() {
-  return localStorage.getItem("deepseekApiKey") || "";
+  return localStorage.getItem("deepseekApiKey") || "sk-1edcd5ee53634b62b5510ca98fc6ee79";
 }
 
 function setDeepSeekApiKey(value) {
@@ -113,6 +113,48 @@ function nextCustomHanziId() {
   return Math.max(CUSTOM_HANZI_START_ID - 1, ...ids) + 1;
 }
 
+function getGeneratedStory() {
+  return JSON.parse(
+    localStorage.getItem("generatedStory") || "null"
+  );
+}
+function buildStoryPrompt() {
+  return `
+Generate a coherent Chinese story for HSK1-3 learners.
+
+STRICT JSON ONLY.
+
+Format:
+
+{
+  "title": "...",
+  "sentences": [
+    {
+      "hanzi": "...",
+      "pinying": "...",
+      "polish_translation": "..."
+    }
+  ]
+}
+
+Rules:
+- 10-20 connected sentences
+- very natural
+- simple grammar
+- mostly HSK1-3 vocabulary
+- story should be coherent and interesting
+- short sentences
+- no markdown
+- no explanations
+- all pinyin must contain tone marks
+`;
+}
+function saveGeneratedStory(story) {
+  localStorage.setItem(
+    "generatedStory",
+    JSON.stringify(story)
+  );
+}
 function normalizeGeneratedCustomChar(hanzi, result) {
   const translations = Array.isArray(result.translations) ? result.translations : [];
   const ruTranslations = Array.isArray(result.ru_translations) ? result.ru_translations : [];
@@ -139,7 +181,57 @@ function normalizeGeneratedCustomChar(hanzi, result) {
     example_ru: result.example_ru || ""
   };
 }
+async function generateStory() {
+  const apiKey = getDeepSeekApiKey();
 
+  if (!apiKey) {
+    alert("Add DeepSeek API key first");
+    return;
+  }
+
+  try {
+    const response = await fetch(DEEPSEEK_API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: DEEPSEEK_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: buildStoryPrompt()
+          }
+        ],
+        temperature: 1
+      })
+    });
+
+    const payload = await response.json();
+
+    let content =
+      payload?.choices?.[0]?.message?.content || "{}";
+
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    const result = JSON.parse(content);
+
+    // replaces previous story
+    saveGeneratedStory(result);
+
+    document.getElementById("generated-list").innerHTML =
+      renderGeneratedList();
+
+  } catch (e) {
+    console.error(e);
+    alert(e.message);
+  }
+}
 function buildCustomHanziPrompt(hanzi) {
   return `Ты помогаешь мне создать персональную систему изучения китайских SIMPLIFIED иероглифов.
 
@@ -409,11 +501,13 @@ function renderPath() {
       <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
       <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
       <button class="examples-toggle" onclick="toggleExamplesList()">📖</button>
+      <button class="generated-toggle" onclick="toggleGeneratedList()">✨</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
     <div id="homo-list" style="display:none"></div>
     <div id="examples-list" style="display:none"></div>
+    <div id="generated-list" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
       <h1>Open levels til</h1>
@@ -1833,13 +1927,183 @@ function renderToneColoredPinyin(hanzi, pinyin) {
     `;
   }).join(" ");
 }
+
+function getGeneratedSentences() {
+  return JSON.parse(
+    localStorage.getItem("generatedSentences") || "[]"
+  );
+}
+
+function saveGeneratedSentences(items) {
+  localStorage.setItem(
+    "generatedSentences",
+    JSON.stringify(items)
+  );
+}
+function buildSentencePrompt() {
+  return `
+generate me ONE chinese sentence for HSK1-2-3.
+
+output STRICT JSON only with keys:
+
+{
+  "hanzi": "...",
+  "polish_translation": "...",
+  "pinying": "..."
+}
+
+rules:
+- short natural sentence
+- use common HSK1-3 vocabulary
+- no markdown
+- no explanations
+`;
+}
+async function generateSentence() {
+  const apiKey = getDeepSeekApiKey();
+
+  if (!apiKey) {
+    alert("Add DeepSeek API key first");
+    return;
+  }
+
+  try {
+    const response = await fetch(DEEPSEEK_API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: DEEPSEEK_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: buildSentencePrompt()
+          }
+        ],
+        temperature: 1
+      })
+    });
+
+    const payload = await response.json();
+
+    let content =
+      payload?.choices?.[0]?.message?.content || "{}";
+
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    const result = JSON.parse(content);
+
+    const items = getGeneratedSentences();
+
+    items.unshift(result);
+
+    saveGeneratedSentences(items);
+
+    document.getElementById("generated-list").innerHTML =
+      renderGeneratedList();
+
+  } catch (e) {
+    console.error(e);
+    alert(e.message);
+  }
+}
+function toggleGeneratedList() {
+  const panel = document.getElementById("generated-list");
+
+  if (!panel.innerHTML) {
+    panel.innerHTML = renderGeneratedList();
+  }
+
+  const isOpening = panel.style.display === "none";
+
+  panel.style.display = isOpening ? "block" : "none";
+
+  const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
+  const homo = document.getElementById("homo-list");
+  const examples = document.getElementById("examples-list");
+
+  if (path) path.style.display = isOpening ? "none" : "block";
+  if (customs) customs.style.display = isOpening ? "none" : "block";
+
+  if (homo) homo.style.display = "none";
+  if (examples) examples.style.display = "none";
+}
+
+function renderGeneratedList() {
+  const story = getGeneratedStory();
+
+  return `
+    <button class="generate-btn" onclick="generateStory()">
+      Generate
+    </button>
+
+    ${
+      !story
+        ? ""
+        : `
+          ${story.sentences.map((c, index) => `
+            <div class="example-row">
+
+              <div
+                class="example-header"
+                onclick="toggleExampleDetails(${index})"
+              >
+
+                <div
+                  class="example-hanzi"
+                  onclick="event.stopPropagation(); speak('${c.hanzi}')"
+                >
+                  ${renderToneColoredHanzi(c.hanzi)}
+                </div>
+
+                <div
+                  class="example-arrow"
+                  id="example-arrow-${index}"
+                >
+                  ‹
+                </div>
+
+              </div>
+
+              <div
+                class="example-details"
+                id="example-details-${index}"
+              >
+
+                <div class="example-pinyin">
+                  ${renderToneColoredPinyin(
+                    c.hanzi,
+                    c.pinying
+                  )}
+                </div>
+
+                <div class="example-ru">
+                  ${c.polish_translation || ""}
+                </div>
+
+              </div>
+
+            </div>
+          `).join("")}
+        `
+    }
+  `;
+}
+
 (async function init() {
   await Promise.all([
     loadHSK(),
     loadPinyinDb()
   ]);
 
-  if (true) {
+  if (false) {
     const existingCustoms = getCustomChars();
 
     if (existingCustoms.length === 0) {

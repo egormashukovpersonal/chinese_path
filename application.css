@@ -33,7 +33,7 @@ html, body {
   box-shadow: 0 6px 14px rgba(0,0,0,0.25);
   margin-bottom: 20px;
   margin-right: 20px;
-  width: 25%;
+  width: 16%;
 }
 .back-btn {
   width: 20%;
@@ -468,7 +468,8 @@ button.completed .level-number{
 }
 
 #examples-list {
-  user-select: all;
+  -webkit-user-select: text;
+  user-select: text;
   margin-bottom: 500px;
 }
 
@@ -477,7 +478,8 @@ button.completed .level-number{
   margin: 25px;
   background: white;
   color: black;
-  user-select: all;
+  -webkit-user-select: text;
+  user-select: text;
 }
 .example-header {
   display: flex;
@@ -522,4 +524,20 @@ button.completed .level-number{
 }
 .tone-char {
     line-height: 130px;
+}
+
+.generated-toggle {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 10%;
+}
+
+.generate-btn {
+  width: 100%;
+  margin-bottom: 30px;
+  font-size: 55px;
+}
+#generated-list {
+  padding-bottom: 500px;
 }
