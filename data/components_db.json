@@ -13303,69 +13303,6 @@
     ]
   },
   {
-    "component": "香",
-    "meaning_en": "fragrant, aroma",
-    "meaning_ru": "аромат, запах",
-    "meaning_pl": "aromatyczny, zapach",
-    "chars": [
-      {
-        "hanzi": "香",
-        "pinyin": "xiāng",
-        "hsk": 3,
-        "translation_ru": "ароматный",
-        "translation_en": "fragrant",
-        "translation_pl": "aromatyczny",
-        "example_hanzi": "香水",
-        "example_pinyin": "xiāngshuǐ",
-        "example_pl": "perfumy"
-      },
-      {
-        "hanzi": "香蕉",
-        "pinyin": "xiāngjiāo",
-        "hsk": 3,
-        "translation_ru": "банан",
-        "translation_en": "banana",
-        "translation_pl": "banan",
-        "example_hanzi": "我喜欢吃香蕉。",
-        "example_pinyin": "Wǒ xǐhuān chī xiāngjiāo.",
-        "example_pl": "Lubię jeść banany."
-      },
-      {
-        "hanzi": "香味",
-        "pinyin": "xiāngwèi",
-        "hsk": 4,
-        "translation_ru": "аромат",
-        "translation_en": "fragrance",
-        "translation_pl": "zapach",
-        "example_hanzi": "花有香味。",
-        "example_pinyin": "Huā yǒu xiāngwèi.",
-        "example_pl": "Kwiaty mają zapach."
-      },
-      {
-        "hanzi": "香肠",
-        "pinyin": "xiāngcháng",
-        "hsk": 4,
-        "translation_ru": "колбаса",
-        "translation_en": "sausage",
-        "translation_pl": "kiełbasa",
-        "example_hanzi": "我买了香肠。",
-        "example_pinyin": "Wǒ mǎi le xiāngcháng.",
-        "example_pl": "Kupiłem kiełbasę."
-      },
-      {
-        "hanzi": "香港",
-        "pinyin": "Xiānggǎng",
-        "hsk": 3,
-        "translation_ru": "Гонконг",
-        "translation_en": "Hong Kong",
-        "translation_pl": "Hongkong",
-        "example_hanzi": "我去过香港。",
-        "example_pinyin": "Wǒ qùguo Xiānggǎng.",
-        "example_pl": "Byłem w Hongkongu."
-      }
-    ]
-  },
-  {
     "component": "瓜",
     "meaning_en": "melon",
     "meaning_ru": "дыня, тыква",

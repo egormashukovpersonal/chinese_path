@@ -576,6 +576,9 @@ button.completed .level-number{
   margin-right: 25px;
 }
 
+#components-list {
+  padding-bottom: 500px;
+}
 .component-char {
   cursor: pointer;
 }
