@@ -26,10 +26,10 @@ async function loadHSK() {
 }
 
 
-let COMPONENTS_DB = [];
+let COMPONENTS_DB2 = [];
 async function loadComponentsDb() {
-  const res = await fetch("./data/components_db.json");
-  COMPONENTS_DB = await res.json();
+  const res = await fetch("./data/components_db2.json");
+  COMPONENTS_DB2 = await res.json();
 }
 
 let PINYIN_DB = {};
@@ -684,7 +684,7 @@ function renderComponentsList() {
   var usePinyin =
     localStorage.getItem("usePinyin") !== "false";
 
-  return COMPONENTS_DB.map(function(group, groupIndex) {
+  return COMPONENTS_DB2.map(function(group, groupIndex) {
 
     var charsHtml = group.chars.map(function(char, charIndex) {
 
@@ -754,7 +754,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
     "component-details-" + groupIndex
   );
 
-  var group = COMPONENTS_DB[groupIndex];
+  var group = COMPONENTS_DB2[groupIndex];
   var char = group.chars[charIndex];
 
   var current = container.dataset.currentIndex;
