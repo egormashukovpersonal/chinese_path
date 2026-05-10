@@ -2427,7 +2427,7 @@ function renderGeneratedList() {
     loadComponentsDb()
   ]);
 
-  if (true) {
+  if (false) {
     const existingCustoms = getCustomChars();
 
     if (existingCustoms.length === 0) {
