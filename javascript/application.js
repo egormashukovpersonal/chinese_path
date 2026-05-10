@@ -25,6 +25,13 @@ async function loadHSK() {
   HSK = [...hsk1, ...hsk2];
 }
 
+
+let COMPONENTS_DB = [];
+async function loadComponentsDb() {
+  const res = await fetch("./data/components_db.json");
+  COMPONENTS_DB = await res.json();
+}
+
 let PINYIN_DB = {};
 async function loadPinyinDb() {
   const res = await fetch("./data/pinyin_db.json");
@@ -417,12 +424,38 @@ function isLevelCompleted(level) {
   return !!progress.completedLevels?.[level];
 }
 
-function toggleRestore() {
-  const panel = document.getElementById("restore-panel");
-  panel.style.display =
-    panel.style.display === "none" ? "block" : "none";
-}
+function toggleDevMenu() {
+  const panel =
+    document.getElementById("restore-panel");
 
+  const opening =
+    panel.style.display === "none";
+
+  closeAllPanels();
+
+  if (!opening) {
+    return;
+  }
+
+  panel.style.display = "block";
+
+  const path = document.getElementById("path");
+  const customs =
+    document.getElementById("custom-hanzi-list");
+
+  if (path) {
+    path.style.display = "none";
+  }
+
+  if (customs) {
+    customs.style.display = "none";
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
 function restoreFromInput() {
   const level = parseInt(
     document.getElementById("restore-level").value,
@@ -479,7 +512,46 @@ function selectSrsSize(value) {
 function isLevelEmpty(level) {
   return getHanziPreviewForLevel(level).length === 0;
 }
+function closeAllPanels() {
+  [
+    "homo-list",
+    "examples-list",
+    "generated-list",
+    "components-list",
+    "restore-panel"
+  ].forEach(id => {
+    const el = document.getElementById(id);
 
+    if (el) {
+      el.style.display = "none";
+    }
+  });
+
+  const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
+
+  if (path) path.style.display = "block";
+  if (customs) customs.style.display = "block";
+}
+function goHome() {
+  closeAllPanels();
+
+  const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
+
+  if (path) {
+    path.style.display = "block";
+  }
+
+  if (customs) {
+    customs.style.display = "block";
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
 function renderPath() {
   const maxId = Math.max(...HSK.map(c => c.id));
   const totalLevels = Math.ceil(maxId / CHARS_PER_LEVEL);
@@ -500,21 +572,24 @@ function renderPath() {
 
   app.innerHTML = `
     <div class="fixed-bottom">
-      <button id='srs-btn' onclick='startSrsSession()'>SRS</button>
+      <button class="home-toggle" onclick="goHome()">🏠</button>
+      <button class="pinyin-toggle" onclick="togglePinyin()">ā</button>
+      <button id='srs-btn' onclick='startSrsSession()'>🧠</button>
       <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
-      <button class="dev-toggle" onclick="toggleRestore()">⚙︎</button>
+      <button class="dev-toggle" onclick="toggleDevMenu()">⚙︎</button>
       <button class="srs-size-btn" style="display: none" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
       <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
-      <button class="pinyin-toggle" onclick="togglePinyin()">🅰︎</button>
       <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
-      <button class="examples-toggle" onclick="toggleExamplesList()">📖</button>
+      <button class="examples-toggle" style="display: none" onclick="toggleExamplesList()">📖</button>
       <button class="generated-toggle" onclick="toggleGeneratedList()">✨</button>
+      <button class="components-toggle" onclick="toggleComponentsList()">🧩</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
     <div id="homo-list" style="display:none"></div>
     <div id="examples-list" style="display:none"></div>
     <div id="generated-list" style="display:none"></div>
+    <div id="components-list" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
       <h1>Open levels til</h1>
@@ -581,33 +656,229 @@ function renderPath() {
     });
   }
 }
+function toggleComponentsList() {
+  const panel = document.getElementById("components-list");
 
+  const opening =
+    panel.style.display === "none";
+
+  closeAllPanels();
+
+  if (!opening) {
+    return;
+  }
+
+  if (!panel.innerHTML) {
+    panel.innerHTML = renderComponentsList();
+  }
+
+  panel.style.display = "block";
+
+  const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
+
+  if (path) path.style.display = "none";
+  if (customs) customs.style.display = "none";
+}
+function renderComponentsList() {
+  var usePinyin =
+    localStorage.getItem("usePinyin") !== "false";
+
+  return COMPONENTS_DB.map(function(group, groupIndex) {
+
+    var charsHtml = group.chars.map(function(char, charIndex) {
+
+      return (
+        '<div class="component-char-wrapper">' +
+
+          '<div ' +
+            'class="component-char" ' +
+            'onclick="toggleComponentCharDetails(' +
+              groupIndex + ', ' + charIndex +
+            ')"' +
+          '>' +
+            renderToneColoredHanzi(char.hanzi) +
+
+            '<div ' +
+              'class="component-char-pinyin preview-pinyin" ' +
+              'style="display:' +
+                (usePinyin ? "block" : "none") +
+              '"' +
+            '>' +
+              renderToneColoredPinyin(
+                char.hanzi,
+                char.pinyin || ""
+              ) +
+            '</div>' +
+          '</div>' +
+
+        '</div>'
+      );
+
+    }).join("");
+
+    return (
+      '<div class="component-group">' +
+
+        '<div class="component-row">' +
+
+          '<div class="component-char">' +
+            renderToneColoredHanzi(group.component) +
+
+            '<div ' +
+              'class="component-char-pinyin preview-pinyin" ' +
+              'style="display:' +
+                (usePinyin ? "block" : "none") +
+              '"' +
+            '>' +
+            '&nbsp;' +
+            '</div>' +
+          '</div>' +
+
+          charsHtml +
+
+        '</div>' +
+
+        '<div ' +
+          'class="component-details-container" ' +
+          'id="component-details-' + groupIndex + '"' +
+        '></div>' +
+
+      '</div>'
+    );
+
+  }).join("");
+}
+function toggleComponentCharDetails(groupIndex, charIndex) {
+  var container = document.getElementById(
+    "component-details-" + groupIndex
+  );
+
+  var group = COMPONENTS_DB[groupIndex];
+  var char = group.chars[charIndex];
+
+  var current = container.dataset.currentIndex;
+
+  if (current == charIndex) {
+    container.innerHTML = "";
+    container.dataset.currentIndex = "";
+    return;
+  }
+
+  container.dataset.currentIndex = charIndex;
+
+  var translations = [
+    char.translation_en,
+    char.translation_ru,
+    char.translation_pl
+  ]
+    .filter(function(item) {
+      return Boolean(item);
+    })
+    .join(" · ");
+
+  container.innerHTML =
+    '<div class="component-char-details">' +
+
+
+      '<div class="component-row">' +
+        '<div class="component-char-wrapper">' +
+          '<div class="component-char">' +
+            '<div class="component-detail-hanzi">' +
+              renderToneColoredHanzi(char.hanzi) +
+
+              '<div class="component-detail-pinyin">' +
+                renderToneColoredPinyin(
+                  char.hanzi,
+                  char.pinyin
+                ) +
+              '</div>' +
+
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="component-detail-hsk">' +
+        'HSK ' + (char.hsk || "?") +
+      '</div>' +
+
+      '<div class="component-detail-translations">' +
+        translations +
+      '</div>' +
+
+      '<div class="component-detail-example-hanzi">' +
+        renderToneColoredHanzi(
+          char.example_hanzi || ""
+        ) +
+      '</div>' +
+
+      '<div class="component-detail-example-pinyin">' +
+        char.example_pinyin +
+      '</div>' +
+
+      '<div class="component-detail-example-pl">' +
+        (char.example_pl || "") +
+      '</div>' +
+
+    '</div>';
+}
 function savePathScroll() {
   if (!location.hash || location.hash === "#") {
     localStorage.setItem("pathScroll", String(window.scrollY));
   }
 }
 function renderCustomHanziList() {
-  const container = document.getElementById("custom-hanzi-list");
+  const container =
+    document.getElementById("custom-hanzi-list");
+
   if (!container) return;
 
   const customChars = getCustomChars();
+
   if (!customChars.length) {
     container.innerHTML = "";
     return;
   }
-  let usePinyin = localStorage.getItem("usePinyin") !== "false";
 
-  container.innerHTML = `
-    <div class="custom-hanzi-grid">
-      ${customChars.map((c, index) => `
-        <button class="custom-hanzi-card" onclick="savePathScroll(); location.hash='#/custom/${index}'">
-          <span class="custom-hanzi-main">${renderToneColoredHanzi(c.hanzi)}</span>
-          ${usePinyin ? `<span class="custom-hanzi-pinyin">${renderToneColoredPinyin(c.hanzi, c.pinyin || "")}</span>` : ""}
-        </button>
-      `).join("")}
-    </div>
-  `;
+  const usePinyin =
+    localStorage.getItem("usePinyin") !== "false";
+
+  container.innerHTML =
+    '<div class="custom-hanzi-grid">' +
+
+      customChars.map(function(c, index) {
+
+        return (
+          '<button ' +
+            'class="custom-hanzi-card" ' +
+            'onclick="savePathScroll(); location.hash=\'#/custom/' +
+              index +
+            '\'"' +
+          '>' +
+
+            '<span class="custom-hanzi-main">' +
+              renderToneColoredHanzi(c.hanzi) +
+            '</span>' +
+
+            '<span ' +
+              'class="custom-hanzi-pinyin preview-pinyin" ' +
+              'style="display:' +
+                (usePinyin ? "block" : "none") +
+              ';"' +
+            '>' +
+              renderToneColoredPinyin(
+                c.hanzi,
+                c.pinyin || ""
+              ) +
+            '</span>' +
+
+          '</button>'
+        );
+
+      }).join("") +
+
+    '</div>';
 }
 
 function ignoreSrsUntilLevel() {
@@ -903,30 +1174,77 @@ function range(a, b) {
 }
 
 function togglePinyin() {
-  const current = localStorage.getItem("usePinyin") !== "false";
+  const current =
+    localStorage.getItem("usePinyin") !== "false";
 
   const next = !current;
-  localStorage.setItem("usePinyin", String(next));
 
-  renderPath();
+  localStorage.setItem(
+    "usePinyin",
+    String(next)
+  );
+
+  repaintPinyinVisibility();
+}
+function repaintPinyinVisibility() {
+  const enabled =
+    localStorage.getItem("usePinyin") !== "false";
+
+  // main page previews
+  document.querySelectorAll(".preview-pinyin")
+    .forEach(el => {
+      el.style.display =
+        enabled ? "block" : "none";
+    });
+
+  // components page
+  document.querySelectorAll(".component-char-pinyin")
+    .forEach(el => {
+      el.style.display =
+        enabled ? "block" : "none";
+    });
 }
 
 function getHanziPreviewForLevel(level) {
-  let usePinyin = localStorage.getItem("usePinyin") !== "false";
-  const sep = "";
+  var usePinyin =
+    localStorage.getItem("usePinyin") !== "false";
 
-  let filtered = getCharsForLevel(level).filter(c => !isIgnoredFromSrs(c.hanzi))
+  var filtered = getCharsForLevel(level)
+    .filter(function(c) {
+      return !isIgnoredFromSrs(c.hanzi);
+    });
 
-  return filtered.map((c, i) =>
-      usePinyin
-        ? `<div>
-             <div>${renderToneColoredHanzi(c.hanzi)}</div>
-             <div class='preview-pinyin'>${renderToneColoredPinyin(c.hanzi, c.pinyin)}</div>
-             ${i < filtered.length - 1 ? '<hr>' : ''}
-           </div>`
-        : `<div>${renderToneColoredHanzi(c.hanzi)}</div>`
-    )
-    .join(sep);
+  return filtered.map(function(c, i) {
+
+    return (
+      '<div>' +
+
+        '<div>' +
+          renderToneColoredHanzi(c.hanzi) +
+        '</div>' +
+
+        '<div ' +
+          'class="preview-pinyin" ' +
+          'style="display:' +
+            (usePinyin ? "block" : "none") +
+          ';"' +
+        '>' +
+          renderToneColoredPinyin(
+            c.hanzi,
+            c.pinyin
+          ) +
+        '</div>' +
+
+        (
+          i < filtered.length - 1
+            ? '<hr>'
+            : ''
+        ) +
+
+      '</div>'
+    );
+
+  }).join("");
 }
 
 function getCharsForLevel(level) {
@@ -1477,6 +1795,7 @@ function toggleSrsCalendar() {
 }
 
 function toggleHomoList() {
+  closeAllPanels();
   const homoList = document.getElementById("homo-list");
   if (!homoList.innerHTML) {
     homoList.innerHTML = renderHomoList();
@@ -1573,7 +1892,7 @@ function renderHomoList() {
           <div class="homo-values">
             ${index[key].map(v => `
               <span class="homo-val" onclick="speak('${v.hanzi}')">
-                ${v.hanzi} (${v.pinyin})
+                ${renderToneColoredHanzi(v.hanzi)} (${v.pinyin})
               </span>
             `).join("")}
           </div>
@@ -1847,6 +2166,7 @@ function repaintToneColors() {
   });
 }
 function toggleExamplesList() {
+  closeAllPanels();
   const examplesList = document.getElementById("examples-list");
 
   if (!examplesList.innerHTML) {
@@ -2021,6 +2341,7 @@ async function generateSentence() {
   }
 }
 function toggleGeneratedList() {
+  closeAllPanels();
   const panel = document.getElementById("generated-list");
 
   if (!panel.innerHTML) {
@@ -2104,7 +2425,8 @@ function renderGeneratedList() {
 (async function init() {
   await Promise.all([
     loadHSK(),
-    loadPinyinDb()
+    loadPinyinDb(),
+    loadComponentsDb()
   ]);
 
   if (true) {
