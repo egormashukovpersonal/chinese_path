@@ -416,10 +416,10 @@ button.completed .level-number{
 .custom-hanzi-pinyin {
   font-size: 45px;
   opacity: 0.85;
-  margin-top: 12px;
 }
 .preview-pinyin {
-  font-size: 50px;
+  font-size: 45px;
+  margin-top: -5px;
 }
 
 .custom-hanzi-input-btn {
@@ -581,7 +581,24 @@ button.completed .level-number{
 }
 
 .component-details-container {
-  margin-top: 20px;
+  margin-top: 14px;
+  padding: 16px;
+
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(212, 175, 55, 0.12),
+      rgba(212, 175, 55, 0.05)
+    );
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03) inset,
+    0 6px 20px rgba(0,0,0,0.18);
+
+  backdrop-filter: blur(4px);
 }
 
 .component-char-details {

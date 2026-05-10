@@ -701,9 +701,9 @@ function renderComponentsList() {
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
-              'style="display:' +
-                (usePinyin ? "block" : "none") +
-              '"' +
+              'style="visibility:' +
+                (usePinyin ? "visible" : "hidden") +
+              ';"' +
             '>' +
               renderToneColoredPinyin(
                 char.hanzi,
@@ -727,9 +727,9 @@ function renderComponentsList() {
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
-              'style="display:' +
-                (usePinyin ? "block" : "none") +
-              '"' +
+              'style="visibility:' +
+                (usePinyin ? "visible" : "hidden") +
+              ';"' +
             '>' +
             '&nbsp;' +
             '</div>' +
@@ -863,8 +863,8 @@ function renderCustomHanziList() {
 
             '<span ' +
               'class="custom-hanzi-pinyin preview-pinyin" ' +
-              'style="display:' +
-                (usePinyin ? "block" : "none") +
+              'style="visibility:' +
+                (usePinyin ? "visible" : "hidden") +
               ';"' +
             '>' +
               renderToneColoredPinyin(
@@ -1190,18 +1190,16 @@ function repaintPinyinVisibility() {
   const enabled =
     localStorage.getItem("usePinyin") !== "false";
 
-  // main page previews
   document.querySelectorAll(".preview-pinyin")
-    .forEach(el => {
-      el.style.display =
-        enabled ? "block" : "none";
+    .forEach(function(el) {
+      el.style.visibility =
+        enabled ? "visible" : "hidden";
     });
 
-  // components page
   document.querySelectorAll(".component-char-pinyin")
-    .forEach(el => {
-      el.style.display =
-        enabled ? "block" : "none";
+    .forEach(function(el) {
+      el.style.visibility =
+        enabled ? "visible" : "hidden";
     });
 }
 
@@ -1225,8 +1223,8 @@ function getHanziPreviewForLevel(level) {
 
         '<div ' +
           'class="preview-pinyin" ' +
-          'style="display:' +
-            (usePinyin ? "block" : "none") +
+          'style="visibility:' +
+            (usePinyin ? "visible" : "hidden") +
           ';"' +
         '>' +
           renderToneColoredPinyin(
