@@ -26,6 +26,12 @@ async function loadHSK() {
 }
 
 
+let PHONETICS_DB = [];
+async function loadPhoneticsDb() {
+  const res = await fetch("./data/phonetics_db.json");
+  PHONETICS_DB = await res.json();
+}
+
 let COMPONENTS_DB2 = [];
 async function loadComponentsDb() {
   const res = await fetch("./data/components_db2.json");
@@ -518,6 +524,7 @@ function closeAllPanels() {
     "examples-list",
     "generated-list",
     "components-list",
+    "phonetics-list",
     "restore-panel"
   ].forEach(id => {
     const el = document.getElementById(id);
@@ -573,16 +580,19 @@ function renderPath() {
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="home-toggle" onclick="goHome()">🏠</button>
-      <button class="pinyin-toggle" onclick="togglePinyin()">ā</button>
       <button id='srs-btn' onclick='startSrsSession()'>🧠</button>
-      <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
-      <button class="dev-toggle" onclick="toggleDevMenu()">⚙︎</button>
-      <button class="srs-size-btn" style="display: none" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
-      <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
-      <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
-      <button class="examples-toggle" style="display: none" onclick="toggleExamplesList()">📖</button>
       <button class="generated-toggle" onclick="toggleGeneratedList()">✨</button>
       <button class="components-toggle" onclick="toggleComponentsList()">🧩</button>
+      <button class="phonetics-toggle" onclick="togglePhoneticsList()">🧬</button>
+
+      <button class="srs-size-btn" style="display: none" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
+      <button class="examples-toggle" style="display: none" onclick="toggleExamplesList()">📖</button>
+
+      <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
+      <button class="dev-toggle" onclick="toggleDevMenu()">⚙︎</button>
+      <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
+      <button class="pinyin-toggle" onclick="togglePinyin()">ā</button>
+      <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
@@ -590,6 +600,7 @@ function renderPath() {
     <div id="examples-list" style="display:none"></div>
     <div id="generated-list" style="display:none"></div>
     <div id="components-list" style="display:none"></div>
+    <div id="phonetics-list" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
       <h1>Open levels til</h1>
@@ -656,6 +667,232 @@ function renderPath() {
     });
   }
 }
+function togglePhoneticsList() {
+  const panel = document.getElementById("phonetics-list");
+
+  const opening =
+    panel.style.display === "none";
+
+  closeAllPanels();
+
+  if (!opening) {
+    console.log('[Egor]', 'CLOSING')
+    return;
+  }
+
+  if (!panel.innerHTML) {
+    panel.innerHTML = renderPhoneticsList();
+  }
+
+  panel.style.display = "block";
+
+  const path = document.getElementById("path");
+  const customs = document.getElementById("custom-hanzi-list");
+
+  if (path) path.style.display = "none";
+  if (customs) customs.style.display = "none";
+}
+function renderPhoneticsList() {
+  var usePinyin =
+    localStorage.getItem("usePinyin") !== "false";
+
+  return PHONETICS_DB.map(function(group, groupIndex) {
+    var charsHtml = group.chars.map(function(char, charIndex) {
+
+      return (
+        '<div class="phonetic-char-wrapper">' +
+
+          '<div ' +
+            'class="phonetic-char" ' +
+            'onclick="togglePhoneticCharDetails(' +
+              groupIndex + ', ' + charIndex +
+            ')"' +
+          '>' +
+
+            renderToneColoredHanzi(char.hanzi) +
+
+            '<div ' +
+              'class="phonetic-char-pinyin preview-pinyin" ' +
+              'style="visibility:' +
+                (usePinyin ? "visible" : "hidden") +
+              ';"' +
+            '>' +
+
+              renderToneColoredPinyin(
+                char.hanzi,
+                char.pinyin || ""
+              ) +
+
+            '</div>' +
+
+          '</div>' +
+
+        '</div>'
+      );
+
+    }).join("");
+
+    return (
+      '<div class="phonetic-group">' +
+
+        '<div class="phonetic-row">' +
+
+          '<div ' +
+            'class="phonetic-char phonetic-char-main" ' +
+            'onclick="togglePhoneticGroup(' + groupIndex + ')"' +
+          '>' +
+
+            renderToneColoredHanzi(group.phonetic) +
+
+            '<div ' +
+              'class="phonetic-char-pinyin preview-pinyin" ' +
+              'style="visibility:' +
+                (usePinyin ? "visible" : "hidden") +
+              ';"' +
+            '>' +
+
+              renderToneColoredPinyin(
+                group.phonetic,
+                group.phonetic_pinyin || ""
+              ) +
+
+            '</div>' +
+
+          '</div>' +
+
+          '<div ' +
+            'class="phonetic-group-chars" ' +
+            'id="phonetic-group-' + groupIndex + '" ' +
+            'style="display:none;"' +
+          '>' +
+
+            charsHtml +
+
+          '</div>' +
+
+        '</div>' +
+
+        '<div ' +
+          'class="phonetic-details-container" ' +
+          'id="phonetic-details-' + groupIndex + '"' +
+        '></div>' +
+
+      '</div>'
+    );
+
+  }).join("");
+}
+function togglePhoneticCharDetails(groupIndex, charIndex) {
+  var container = document.getElementById(
+    "phonetic-details-" + groupIndex
+  );
+
+  var group = PHONETICS_DB[groupIndex];
+  var char = group.chars[charIndex];
+
+  var current = container.dataset.currentIndex;
+
+  if (
+    current !== undefined &&
+    current !== "" &&
+    Number(current) === charIndex
+  ) {
+    container.innerHTML = "";
+    container.dataset.currentIndex = "";
+    return;
+  }
+
+  container.dataset.currentIndex = charIndex;
+
+  var translations = [
+    char.translation_en,
+    char.translation_ru,
+    char.translation_pl
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  container.innerHTML =
+    '<div class="phonetic-char-details">' +
+
+      '<div class="phonetic-row">' +
+
+        '<div class="phonetic-char-wrapper">' +
+
+          '<div class="phonetic-char">' +
+
+            '<div class="phonetic-detail-hanzi">' +
+
+              renderToneColoredHanzi(char.hanzi) +
+
+              '<div class="phonetic-detail-pinyin">' +
+
+                renderToneColoredPinyin(
+                  char.hanzi,
+                  char.pinyin
+                ) +
+
+              '</div>' +
+
+            '</div>' +
+
+          '</div>' +
+
+        '</div>' +
+
+      '</div>' +
+
+      '<div class="phonetic-detail-hsk">' +
+        'HSK ' + (char.hsk || "?") +
+      '</div>' +
+
+      '<div class="phonetic-detail-translations">' +
+        translations +
+      '</div>' +
+
+      '<div class="phonetic-detail-example-hanzi">' +
+        renderToneColoredHanzi(
+          char.example_hanzi || ""
+        ) +
+      '</div>' +
+
+      '<div class="phonetic-detail-example-pinyin">' +
+        (char.example_pinyin || "") +
+      '</div>' +
+
+      '<div class="phonetic-detail-example-pl">' +
+        (char.example_pl || "") +
+      '</div>' +
+
+    '</div>';
+}
+
+function togglePhoneticGroup(groupIndex) {
+  var groupEl = document.getElementById(
+    "phonetic-group-" + groupIndex
+  );
+
+  var detailsEl = document.getElementById(
+    "phonetic-details-" + groupIndex
+  );
+
+  if (!groupEl) return;
+
+  var opening =
+    groupEl.style.display === "none";
+
+  groupEl.style.display =
+    opening
+      ? "grid"
+      : "none";
+
+  // закрываем details только
+  // при закрытии текущей группы
+  if (!opening && detailsEl) {
+    detailsEl.innerHTML = "";
+    detailsEl.dataset.currentIndex = "";
+  }
+}
 function toggleComponentsList() {
   const panel = document.getElementById("components-list");
 
@@ -685,7 +922,6 @@ function renderComponentsList() {
     localStorage.getItem("usePinyin") !== "false";
 
   return COMPONENTS_DB2.map(function(group, groupIndex) {
-
     var charsHtml = group.chars.map(function(char, charIndex) {
 
       return (
@@ -722,7 +958,10 @@ function renderComponentsList() {
 
         '<div class="component-row">' +
 
-          '<div class="component-char">' +
+          '<div ' +
+            'class="component-char component-char-main" ' +
+            'onclick="toggleComponentGroup(' + groupIndex + ')"' +
+          '>' +
             renderToneColoredHanzi(group.component) +
 
             '<div ' +
@@ -735,7 +974,15 @@ function renderComponentsList() {
             '</div>' +
           '</div>' +
 
-          charsHtml +
+          '<div ' +
+            'class="component-group-chars" ' +
+            'id="component-group-' + groupIndex + '" ' +
+            'style="display:none;"' +
+          '>' +
+
+            charsHtml +
+
+          '</div>' +
 
         '</div>' +
 
@@ -749,6 +996,33 @@ function renderComponentsList() {
 
   }).join("");
 }
+
+function toggleComponentGroup(groupIndex) {
+  var groupEl = document.getElementById(
+    "component-group-" + groupIndex
+  );
+
+  var detailsEl = document.getElementById(
+    "component-details-" + groupIndex
+  );
+
+  if (!groupEl) return;
+
+  var opening =
+    groupEl.style.display === "none";
+
+  groupEl.style.display =
+    opening
+      ? "contents"
+      : "none";
+
+  // закрываем details только
+  // при закрытии текущей группы
+  if (!opening && detailsEl) {
+    detailsEl.innerHTML = "";
+    detailsEl.dataset.currentIndex = "";
+  }
+}
 function toggleComponentCharDetails(groupIndex, charIndex) {
   var container = document.getElementById(
     "component-details-" + groupIndex
@@ -759,7 +1033,11 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
 
   var current = container.dataset.currentIndex;
 
-  if (current == charIndex) {
+  if (
+    current !== undefined &&
+    current !== "" &&
+    Number(current) === charIndex
+  ) {
     container.innerHTML = "";
     container.dataset.currentIndex = "";
     return;
@@ -2424,7 +2702,8 @@ function renderGeneratedList() {
   await Promise.all([
     loadHSK(),
     loadPinyinDb(),
-    loadComponentsDb()
+    loadComponentsDb(),
+    loadPhoneticsDb()
   ]);
 
   if (false) {

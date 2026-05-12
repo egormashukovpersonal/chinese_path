@@ -18,25 +18,13 @@ html, body {
 .homo-values,
 .homo-val,
 #meaning,
+.tone-char,
+.component-char-details,
+.phonetic-char-details,
 .char-card {
   -webkit-user-select: text;
   user-select: text;
 }
-#srs-btn {
-  float: right;
-  background: none;
-  /*background: linear-gradient(135deg, #8e44ad, #3498db);*/
-  /*color: white;*/
-  border: none;
-  /*padding: 10px 18px;*/
-  /*border-radius: 999px;*/
-  /*font-weight: 600;*/
-  /*box-shadow: 0 6px 14px rgba(0,0,0,0.25);*/
-  margin-bottom: 20px;
-  margin-right: 20px;
-  width: 10%;
-}
-
 .back-btn {
   width: 20%;
   margin-left: 20px;
@@ -214,7 +202,7 @@ button.locked {
 }
 #speak-mute-btn {
   background: none !important;
-  width: 10%;
+  width: 19.5%;
   border: none !important;
   font-size: 70px;
 }
@@ -223,11 +211,11 @@ button.locked {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 10%;
+  width: 19.5%;
 }
 .dev-toggle {
   background: none;
-  width: 10%;
+  width: 19.5%;
   border: none !important;
   font-size: 100px;
 }
@@ -251,7 +239,7 @@ button.locked {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 10%;
+  width: 19.5%;
 }
 
 #srs-calendar h1 {
@@ -279,7 +267,7 @@ button.locked {
 }
 
 .srs-size-btn {
-  width: 10%;
+  width: 19.5%;
   background: none !important;
   border: none;
   font-size: 70px;
@@ -457,7 +445,7 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 10%;
+  width: 19.5%;
   border-radius: 20px;
 }
 
@@ -532,13 +520,20 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 10%;
+  width: 19.5%;
 }
 .components-toggle {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 10%;
+  width: 19.5%;
+}
+
+#srs-btn {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 19.5%;
 }
 
 .generate-btn {
@@ -550,7 +545,7 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 10%;
+  width: 19.5%;
 }
 #generated-list {
   padding-bottom: 500px;
@@ -644,6 +639,10 @@ button.completed .level-number{
   background: white;
   margin: -1px;
 }
+.phonetic-detail-example-hanzi .tone-char {
+  background: white;
+  margin: -1px;
+}
 
 .component-detail-example-pinyin {
   margin-top: 15px;
@@ -660,4 +659,119 @@ button.completed .level-number{
   flex-direction: column;
   align-items: center;
 }
+.phonetics-toggle {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 19.5%;
+}
 
+#phonetics-list {
+  padding-bottom: 500px;
+}
+
+.phonetic-group {
+  margin-bottom: 70px;
+}
+
+.phonetic-row {
+  flex-wrap: wrap;
+  align-items: baseline;
+
+  font-size: 75px;
+  line-height: 1.4;
+
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.phonetic-char,
+.phonetic-char-main {
+  min-height: 180px;
+  height: auto;
+  border-radius: 0px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  margin: 4px;
+
+  background: white;
+  color: black;
+
+  font-size: 130px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.phonetic-group-chars {
+  display: none;
+
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+
+  grid-column: span 5;
+}
+.phonetic-char-wrapper {
+  width: 100%;
+}
+
+.phonetic-char-pinyin {
+  font-size: 45px;
+}
+
+.phonetic-details-container {
+  margin-top: 14px;
+  padding: 16px;
+
+  border: 1px solid rgba(80, 160, 255, 0.45);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(80, 160, 255, 0.12),
+      rgba(80, 160, 255, 0.05)
+    );
+}
+
+.phonetic-detail-hanzi {
+  font-size: 130px;
+  color: black;
+}
+
+.phonetic-detail-pinyin {
+  font-size: 55px;
+  text-align: center;
+}
+
+.phonetic-detail-hsk {
+  margin-top: 15px;
+  font-size: 40px;
+  opacity: 0.7;
+}
+
+.phonetic-detail-translations {
+  margin-top: 20px;
+  font-size: 55px;
+}
+
+.phonetic-detail-example-hanzi {
+  margin-top: 35px;
+  font-size: 130px;
+  color: black;
+}
+
+.phonetic-detail-example-pinyin {
+  margin-top: 15px;
+  font-size: 55px;
+}
+
+.phonetic-detail-example-pl {
+  margin-top: 15px;
+  font-size: 55px;
+}
