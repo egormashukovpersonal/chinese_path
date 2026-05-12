@@ -692,12 +692,120 @@ function togglePhoneticsList() {
   if (path) path.style.display = "none";
   if (customs) customs.style.display = "none";
 }
+// function renderPhoneticsList() {
+//   var usePinyin =
+//     localStorage.getItem("usePinyin") !== "false";
+
+//   return PHONETICS_DB.map(function(group, groupIndex) {
+//     var charsHtml = group.chars.map(function(char, charIndex) {
+
+//       return (
+//         '<div class="phonetic-char-wrapper">' +
+
+//           '<div ' +
+//             'class="phonetic-char" ' +
+//             'onclick="togglePhoneticCharDetails(' +
+//               groupIndex + ', ' + charIndex +
+//             ')"' +
+//           '>' +
+
+//             renderToneColoredHanzi(char.hanzi) +
+
+//             '<div ' +
+//               'class="phonetic-char-pinyin preview-pinyin" ' +
+//               'style="visibility:' +
+//                 (usePinyin ? "visible" : "hidden") +
+//               ';"' +
+//             '>' +
+
+//               renderToneColoredPinyin(
+//                 char.hanzi,
+//                 char.pinyin || ""
+//               ) +
+
+//             '</div>' +
+
+//           '</div>' +
+
+//         '</div>'
+//       );
+
+//     }).join("");
+
+//     return (
+//       '<div class="phonetic-group">' +
+
+//         '<div class="phonetic-row">' +
+
+//           '<div ' +
+//             'class="phonetic-char phonetic-char-main" ' +
+//             'onclick="togglePhoneticGroup(' + groupIndex + ')"' +
+//           '>' +
+
+//             renderToneColoredHanzi(group.phonetic) +
+
+//             '<div ' +
+//               'class="phonetic-char-pinyin preview-pinyin" ' +
+//               'style="visibility:' +
+//                 (usePinyin ? "visible" : "hidden") +
+//               ';"' +
+//             '>' +
+
+//               renderToneColoredPinyin(
+//                 group.phonetic,
+//                 group.phonetic_pinyin || ""
+//               ) +
+
+//             '</div>' +
+
+//           '</div>' +
+
+//           '<div ' +
+//             'class="phonetic-group-chars" ' +
+//             'id="phonetic-group-' + groupIndex + '" ' +
+//             'style="display:none;"' +
+//           '>' +
+
+//             charsHtml +
+
+//           '</div>' +
+
+//         '</div>' +
+
+//         '<div ' +
+//           'class="phonetic-details-container" ' +
+//           'id="phonetic-details-' + groupIndex + '"' +
+//         '></div>' +
+
+//       '</div>'
+//     );
+
+//   }).join("");
+// }
 function renderPhoneticsList() {
   var usePinyin =
     localStorage.getItem("usePinyin") !== "false";
 
   return PHONETICS_DB.map(function(group, groupIndex) {
-    var charsHtml = group.chars.map(function(char, charIndex) {
+
+    var sortedChars = [...group.chars].sort(function(a, b) {
+      var hskA = Number(a.hsk) || 999;
+      var hskB = Number(b.hsk) || 999;
+
+      if (hskA !== hskB) {
+        return hskA - hskB;
+      }
+
+      return (a.hanzi || "").localeCompare(
+        b.hanzi || "",
+        "zh"
+      );
+    });
+
+    // сохраняем отсортированную версию
+    group._sortedChars = sortedChars;
+
+    var charsHtml = sortedChars.map(function(char, charIndex) {
 
       return (
         '<div class="phonetic-char-wrapper">' +
@@ -788,7 +896,7 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
   );
 
   var group = PHONETICS_DB[groupIndex];
-  var char = group.chars[charIndex];
+  var char = (group._sortedChars || group.chars)[charIndex];
 
   var current = container.dataset.currentIndex;
 
@@ -917,12 +1025,109 @@ function toggleComponentsList() {
   if (path) path.style.display = "none";
   if (customs) customs.style.display = "none";
 }
+// function renderComponentsList() {
+//   var usePinyin =
+//     localStorage.getItem("usePinyin") !== "false";
+
+//   return COMPONENTS_DB2.map(function(group, groupIndex) {
+//     var charsHtml = group.chars.map(function(char, charIndex) {
+
+//       return (
+//         '<div class="component-char-wrapper">' +
+
+//           '<div ' +
+//             'class="component-char" ' +
+//             'onclick="toggleComponentCharDetails(' +
+//               groupIndex + ', ' + charIndex +
+//             ')"' +
+//           '>' +
+//             renderToneColoredHanzi(char.hanzi) +
+
+//             '<div ' +
+//               'class="component-char-pinyin preview-pinyin" ' +
+//               'style="visibility:' +
+//                 (usePinyin ? "visible" : "hidden") +
+//               ';"' +
+//             '>' +
+//               renderToneColoredPinyin(
+//                 char.hanzi,
+//                 char.pinyin || ""
+//               ) +
+//             '</div>' +
+//           '</div>' +
+
+//         '</div>'
+//       );
+
+//     }).join("");
+
+//     return (
+//       '<div class="component-group">' +
+
+//         '<div class="component-row">' +
+
+//           '<div ' +
+//             'class="component-char component-char-main" ' +
+//             'onclick="toggleComponentGroup(' + groupIndex + ')"' +
+//           '>' +
+//             renderToneColoredHanzi(group.component) +
+
+//             '<div ' +
+//               'class="component-char-pinyin preview-pinyin" ' +
+//               'style="visibility:' +
+//                 (usePinyin ? "visible" : "hidden") +
+//               ';"' +
+//             '>' +
+//             '&nbsp;' +
+//             '</div>' +
+//           '</div>' +
+
+//           '<div ' +
+//             'class="component-group-chars" ' +
+//             'id="component-group-' + groupIndex + '" ' +
+//             'style="display:none;"' +
+//           '>' +
+
+//             charsHtml +
+
+//           '</div>' +
+
+//         '</div>' +
+
+//         '<div ' +
+//           'class="component-details-container" ' +
+//           'id="component-details-' + groupIndex + '"' +
+//         '></div>' +
+
+//       '</div>'
+//     );
+
+//   }).join("");
+// }
 function renderComponentsList() {
   var usePinyin =
     localStorage.getItem("usePinyin") !== "false";
 
   return COMPONENTS_DB2.map(function(group, groupIndex) {
-    var charsHtml = group.chars.map(function(char, charIndex) {
+
+    var sortedChars = [...group.chars].sort(function(a, b) {
+      var hskA = Number(a.hsk) || 999;
+      var hskB = Number(b.hsk) || 999;
+
+      if (hskA !== hskB) {
+        return hskA - hskB;
+      }
+
+      return (a.hanzi || "").localeCompare(
+        b.hanzi || "",
+        "zh"
+      );
+    });
+
+    // сохраняем отсортированную версию
+    group._sortedChars = sortedChars;
+
+    var charsHtml = sortedChars.map(function(char, charIndex) {
 
       return (
         '<div class="component-char-wrapper">' +
@@ -1029,7 +1234,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
   );
 
   var group = COMPONENTS_DB2[groupIndex];
-  var char = group.chars[charIndex];
+  var char = (group._sortedChars || group.chars)[charIndex];
 
   var current = container.dataset.currentIndex;
 
