@@ -121,6 +121,10 @@ button {
 .example-p-pinying {
   font-size: 5rem;
 }
+.example-p-hsk {
+  opacity: 0.5;
+  padding-top: 30px;
+}
 
 .progress {
   opacity: 0.6;
@@ -324,7 +328,7 @@ h1 {
 
 #meaning {
   padding-bottom: 500px;
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 .level-number {

@@ -19,8 +19,15 @@ async function loadHSK() {
     fetch("./data/hsk2.json")
   ]);
 
-  const hsk1 = await res1.json();
-  const hsk2 = await res2.json();
+  const hsk1 = (await res1.json()).map(x => ({
+    ...x,
+    hsk: 1
+  }));
+
+  const hsk2 = (await res2.json()).map(x => ({
+    ...x,
+    hsk: 2
+  }));
 
   HSK = [...hsk1, ...hsk2];
 }
@@ -177,6 +184,7 @@ function normalizeGeneratedCustomChar(hanzi, result) {
     id: nextCustomHanziId(),
     custom: true,
     hanzi,
+    hsk: Number(result.hsk) || null,
     pinyin: result.pinyin || "",
     translations,
     ru_translations: ruTranslations,
@@ -288,6 +296,9 @@ example_pinying:
 
 example_ru:
 - русский перевод примера
+
+hsk:
+- цифра HSK уровня, на котором обычно появляется этот иероглиф (1-6), или null, если не определено
 
 Ограничения:
 - каждый параграф — 2–4 предложения
@@ -929,7 +940,7 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
 
           '<div class="phonetic-char">' +
 
-            '<div class="phonetic-detail-hanzi">' +
+            '<div class="phonetic-detail-hanzi" onclick="speak(\'' + char.hanzi + '\')">' +
 
               renderToneColoredHanzi(char.hanzi) +
 
@@ -1267,7 +1278,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
       '<div class="component-row">' +
         '<div class="component-char-wrapper">' +
           '<div class="component-char">' +
-            '<div class="component-detail-hanzi">' +
+            '<div class="component-detail-hanzi" onclick="speak(\'' + char.hanzi + '\')">' +
               renderToneColoredHanzi(char.hanzi) +
 
               '<div class="component-detail-pinyin">' +
@@ -1806,6 +1817,11 @@ function renderCustomChar(index = 0) {
         <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi || c.hanzi}')">${c.example_hanzi || c.hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying || ""}</p>
         <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru || ""}</p>
+        ${
+          c.hsk
+          ? `<p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>`
+          : ''
+        }
       </div>
 
       <div id="meaning" style="display:none">
@@ -1879,6 +1895,7 @@ function renderCustomChar(index = 0) {
 
   const examplePinying = document.getElementById("example-p-pinying");
   const exampleRu = document.getElementById("example-p-ru");
+  const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0;
 
   document.addEventListener("click", (e) => {
@@ -1890,6 +1907,7 @@ function renderCustomChar(index = 0) {
     }
     if (exampleOpenClicks == 2) {
       exampleRu.style.visibility = "visible";
+      exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none';
     }
   });
@@ -1956,6 +1974,7 @@ function renderLevel(level, index = 0) {
         <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
         <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
+        <p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>
       </div>
 
       <div id="meaning" style="display:none">
@@ -2032,6 +2051,7 @@ function renderLevel(level, index = 0) {
 
   const examplePinying = document.getElementById("example-p-pinying");
   const exampleRu = document.getElementById("example-p-ru");
+  const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0
 
   document.addEventListener("click", (e) => {
@@ -2043,6 +2063,7 @@ function renderLevel(level, index = 0) {
     }
     if (exampleOpenClicks == 2) {
       exampleRu.style.visibility = "visible";
+      exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
     };
   });
@@ -2144,6 +2165,7 @@ function renderSrs() {
         <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
         <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
+        <p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>
       </div>
 
       <div id="meaning" style="display:none">
@@ -2220,6 +2242,7 @@ function renderSrs() {
 
   const examplePinying = document.getElementById("example-p-pinying");
   const exampleRu = document.getElementById("example-p-ru");
+  const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0
 
   document.addEventListener("click", (e) => {
@@ -2231,6 +2254,7 @@ function renderSrs() {
     }
     if (exampleOpenClicks == 2) {
       exampleRu.style.visibility = "visible";
+      exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
     };
   });
