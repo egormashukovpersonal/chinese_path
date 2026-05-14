@@ -4,7 +4,7 @@ require "dotenv/load"
 
 API_URL  = "https://api.openai.com/v1/chat/completions"
 MODEL    = "gpt-4.1"
-DATA_FILE = "data/components_db.json"
+DATA_FILE = "data/db_components.json"
 
 COMPONENTS = [
   "口", "女", "人", "亻", "心", "忄", "木", "氵", "火", "灬",
@@ -17,7 +17,7 @@ COMPONENTS = [
   "走", "身", "骨", "黑", "白", "赤", "牙", "齿", "鹿", "麻",
   "龙", "龟", "鼠", "舟", "羽", "羊", "美", "气", "水", "冰",
   "冫", "风", "飞", "首", "香", "瓜", "豆", "角", "辛", "寸"
-]
+].uniq
 
 def generate_for_chatgpt(component)
   prompt = <<~PROMPT
@@ -32,19 +32,23 @@ def generate_for_chatgpt(component)
     Формат:
 
     {
-      "component": "女",
+      "component": "...",
+      "component_traditional": "...",
+      "pinyin": "...",
+      "meaning_pl": "...",
       "meaning_en": "...",
       "meaning_ru": "...",
-      "meaning_pl": "...",
       "chars": [
         {
           "hanzi": "...",
+          "hanzi_traditional": "...",
           "pinyin": "...",
-          "hsk": 1,
+          "hsk": 1, // старый HSK уровни 1-6 или null
           "translation_ru": "...",
           "translation_en": "...",
           "translation_pl": "...",
           "example_hanzi": "...",
+          "example_hanzi_traditional": "...",
           "example_pinyin": "...",
           "example_pl": "..."
         }
@@ -59,8 +63,13 @@ def generate_for_chatgpt(component)
     - не добавляй редкие или древние знаки
     - максимум 25 знаков
     - только ОДИН иероглиф в поле hanzi
+    - сам hanzi только simle, без традиционных форм
+    - а вот уже в hanzi_traditional традиционный знак, строго 1 знак
     - никаких слов или фраз
     - примеры должны быть короткие и естественные
+    - example_hanzi в simple форме
+    - в example_hanzi_traditional должен быть тот же пример что и в example_hanzi но в традиционной форме
+    - pinyin это всегда 1 главный pinyin а не несколько, и не название компонента, например: "rén", а не "rénzìpáng"
     - без markdown
     - без текста вне JSON
   PROMPT

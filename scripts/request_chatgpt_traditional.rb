@@ -4,16 +4,17 @@ require "dotenv/load"
 
 API_URL = "https://api.openai.com/v1/chat/completions"
 MODEL = "gpt-4.1"
-DATA_FILE = "data/hsk1.json"
+DATA_FILE = "data/hsk2.json"
 
 def generate_for_chatgpt(char_data)
   prompt = <<~PROMPT
-
     учу китайский, дай пример простого/популярного употребления в жизни #{char_data["hanzi"]} pinyin которого #{char_data["pinyin"]} в json с ключами:
 
-    example_hanzi - пример использования
+    hanzi_traditional - этот иероглиф в традиционной форме
+    example_hanzi - пример использования simplified
+    example_hanzi_traditional - тот же пример в traditional
     example_pinying - тот же пример в pinying
-    example_ru - тот же пример по русски
+    example_pl - тот же пример по польски
 
     Никакого текста вне JSON.
     Без Markdown.
@@ -45,8 +46,8 @@ data.each_with_index do |char_data, i|
   puts "→ #{hanzi} (#{i + 1}/#{data.size})"
 
   # если философия уже есть — считаем, что объект обработан
-  if char_data.key?("example_hanzi") && !char_data["example_hanzi"].to_s.strip.empty?
-    puts "  пропуск — уже есть example_hanzi"
+  if char_data.key?("hanzi_traditional") && !char_data["hanzi_traditional"].to_s.strip.empty?
+    puts "  пропуск — уже есть hanzi_traditional"
     next
   end
 

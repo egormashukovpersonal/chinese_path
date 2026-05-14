@@ -4,7 +4,7 @@ require "dotenv/load"
 
 API_URL   = "https://api.openai.com/v1/chat/completions"
 MODEL     = "gpt-4.1"
-DATA_FILE = "data/phonetics_db.json"
+DATA_FILE = "data/db_phonetics.json"
 
 PHONETICS = [
   "羊",
@@ -211,7 +211,7 @@ PHONETICS = [
   "卓",
   "宗",
   "足"
-]
+].uniq
 
 def generate_for_chatgpt(phonetic)
   prompt = <<~PROMPT
@@ -226,24 +226,27 @@ def generate_for_chatgpt(phonetic)
     Формат:
 
     {
-      "phonetic": "羊",
+      "phonetic": "汉",
+      "phonetic_traditional": "漢",
       "phonetic_pinyin": "yáng",
 
+      "meaning_pl": "...",
       "meaning_en": "...",
       "meaning_ru": "...",
-      "meaning_pl": "...",
 
       "chars": [
         {
           "hanzi": "...",
+          "hanzi_traditional": "...",
           "pinyin": "...",
-          "hsk": 1,
+          "hsk": 1, // старый HSK уровни 1-6 или null
 
           "translation_ru": "...",
           "translation_en": "...",
           "translation_pl": "...",
 
           "example_hanzi": "...",
+          "example_hanzi_traditional": "...",
           "example_pinyin": "...",
           "example_pl": "..."
         }
@@ -256,11 +259,15 @@ def generate_for_chatgpt(phonetic)
     - пиньинь должен быть похож на фонетик
     - только частые и полезные иероглифы
     - HSK1-5 в приоритете
+    - минимум 4 chars если возможно
     - максимум 25 chars
     - только ОДИН иероглиф в hanzi
+    - сам hanzi только simle, без традиционных форм
+    - а вот уже в hanzi_traditional традиционный знак, строго 1 знак
     - chars должны образовывать ФОНЕТИЧЕСКУЮ семью
     - чтение должно быть исторически или современно связано
-    - минимум 4 chars если возможно
+    - example_hanzi в simple форме
+    - в example_hanzi_traditional должен быть тот же пример что и в example_hanzi но в традиционной форме
     - без markdown
     - без текста вне JSON
   PROMPT

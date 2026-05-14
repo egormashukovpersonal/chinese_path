@@ -28,6 +28,7 @@ html, body {
 .back-btn {
   width: 20%;
   margin-left: 20px;
+  float: left;
 }
 
 .path {
@@ -170,7 +171,7 @@ button {
   width: 20%;
   float: right;
   margin-right: 2%;
-  background: #303030 !important;
+  background: #303030;
 }
 .google-btn, .chatgpt-btn {
   width: 20%;
@@ -206,7 +207,7 @@ button.locked {
 }
 #speak-mute-btn {
   background: none !important;
-  width: 19.5%;
+  width: 15.5%;
   border: none !important;
   font-size: 70px;
 }
@@ -215,11 +216,11 @@ button.locked {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 .dev-toggle {
   background: none;
-  width: 19.5%;
+  width: 15.5%;
   border: none !important;
   font-size: 100px;
 }
@@ -243,7 +244,7 @@ button.locked {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 
 #srs-calendar h1 {
@@ -271,7 +272,7 @@ button.locked {
 }
 
 .srs-size-btn {
-  width: 19.5%;
+  width: 15.5%;
   background: none !important;
   border: none;
   font-size: 70px;
@@ -322,8 +323,13 @@ h1 {
   z-index: 99;
   bottom: -1px;
   left: 0px;
-  padding-bottom: 120px;
+  padding-bottom: 50px;
   padding-top: 20px;
+  text-align: right;
+}
+.fixed-bottom button {
+  background: none;
+  border: none;
 }
 
 #meaning {
@@ -375,6 +381,17 @@ button.completed .level-number{
 .homo-val {
   white-space: nowrap;
   width: 100%;
+}
+
+.homo-val .hanzi-traditional,
+.homo-val .hanzi-simple {
+  background: white;
+  color: black;
+}
+.homo-val .hanzi-traditional.traditional-diff,
+.homo-val .hanzi-simple.traditional-diff {
+  background: wheat;
+  color: black;
 }
 
 .custom-hanzi-grid {
@@ -449,7 +466,14 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
+  border-radius: 20px;
+}
+.traditional-toggle {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 15.5%;
   border-radius: 20px;
 }
 
@@ -513,7 +537,7 @@ button.completed .level-number{
   margin-bottom: 10px;
 }
 
-.example-ru {
+.example-pl {
   font-size: 55px;
 }
 .tone-char {
@@ -524,20 +548,20 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 .components-toggle {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 
 #srs-btn {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 
 .generate-btn {
@@ -549,13 +573,13 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 #generated-list {
   padding-bottom: 500px;
 }
 .component-group {
-  margin-bottom: 70px;
+  margin-bottom: 20px;
 }
 
 .component-row {
@@ -584,16 +608,16 @@ button.completed .level-number{
 
 .component-details-container {
   margin-top: 14px;
-  padding: 16px;
+  /*padding: 16px;*/
 
-  border: 1px solid rgba(212, 175, 55, 0.45);
+  /*border: 1px solid rgba(212, 175, 55, 0.45);*/
   border-radius: 18px;
 
   background:
     linear-gradient(
       180deg,
-      rgba(212, 175, 55, 0.12),
-      rgba(212, 175, 55, 0.05)
+      rgba(80, 160, 255, 0.2),
+      rgba(80, 160, 255, 0.1)
     );
 
   box-shadow:
@@ -612,10 +636,6 @@ button.completed .level-number{
   font-size: 130px;
   color: black;
 }
-.component-detail-hanzi .tone-char{
-  background: white;
-}
-
 
 .component-detail-pinyin {
   font-size: 55px;
@@ -667,7 +687,7 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 19.5%;
+  width: 15.5%;
 }
 
 #phonetics-list {
@@ -675,7 +695,7 @@ button.completed .level-number{
 }
 
 .phonetic-group {
-  margin-bottom: 70px;
+  margin-bottom: 20px;
 }
 
 .phonetic-row {
@@ -730,9 +750,9 @@ button.completed .level-number{
 
 .phonetic-details-container {
   margin-top: 14px;
-  padding: 16px;
+  /*padding: 16px;*/
 
-  border: 1px solid rgba(80, 160, 255, 0.45);
+  /*border: 1px solid rgba(80, 160, 255, 0.45);*/
   border-radius: 18px;
 
   background:
@@ -778,4 +798,18 @@ button.completed .level-number{
 .phonetic-detail-example-pl {
   margin-top: 15px;
   font-size: 55px;
+}
+.grayscale-ui,
+.grayscale-ui * {
+  filter: grayscale(1) !important;
+  color: darkgray !important;
+}
+.hidden {
+  display: none !important;
+}
+.custom-hanzi-card:has(.traditional-diff),
+.level-hanzi:has(.traditional-diff),
+.component-char:has(.traditional-diff),
+.phonetic-char:has(.traditional-diff) {
+  background: wheat;
 }

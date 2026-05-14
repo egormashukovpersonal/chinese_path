@@ -11,6 +11,12 @@ const DEEPSEEK_MODEL = "deepseek-chat";
   }
 })();
 
+(function initToneColorSettings() {
+  if (localStorage.getItem("useToneColors") === null) {
+    localStorage.setItem("useToneColors", "true");
+  }
+})();
+
 let HSK = [];
 
 async function loadHSK() {
@@ -35,19 +41,19 @@ async function loadHSK() {
 
 let PHONETICS_DB = [];
 async function loadPhoneticsDb() {
-  const res = await fetch("./data/phonetics_db.json");
+  const res = await fetch("./data/db_phonetics.json");
   PHONETICS_DB = await res.json();
 }
 
 let COMPONENTS_DB2 = [];
 async function loadComponentsDb() {
-  const res = await fetch("./data/components_db2.json");
+  const res = await fetch("./data/db_components.json");
   COMPONENTS_DB2 = await res.json();
 }
 
 let PINYIN_DB = {};
 async function loadPinyinDb() {
-  const res = await fetch("./data/pinyin_db.json");
+  const res = await fetch("./data/db_pinyin.json");
   PINYIN_DB = await res.json();
 }
 
@@ -150,7 +156,8 @@ Format:
   "title": "...",
   "sentences": [
     {
-      "hanzi": "...",
+      "hanzi": "...", // in simplified
+      "hanzi_traditional": "...", // same as hanzi only in traditional
       "pinying": "...",
       "polish_translation": "..."
     }
@@ -160,7 +167,7 @@ Format:
 Rules:
 - 10-20 connected sentences
 - very natural
-- simple grammar
+- not complex grammar
 - mostly HSK1-3 vocabulary
 - story should be coherent and interesting
 - short sentences
@@ -184,6 +191,7 @@ function normalizeGeneratedCustomChar(hanzi, result) {
     id: nextCustomHanziId(),
     custom: true,
     hanzi,
+    hanzi_traditional: result.hanzi_traditional || hanzi,
     hsk: Number(result.hsk) || null,
     pinyin: result.pinyin || "",
     translations,
@@ -198,8 +206,10 @@ function normalizeGeneratedCustomChar(hanzi, result) {
     deepseek_description_pl_paragraph_3: result.deepseek_description_pl_paragraph_3 || "",
     deepseek_description_pl_paragraph_4: result.deepseek_description_pl_paragraph_4 || "",
     example_hanzi: result.example_hanzi || hanzi,
+    example_hanzi_traditional: result.example_hanzi_traditional || result.example_hanzi || hanzi,
     example_pinying: result.example_pinying || result.example_pinyin || result.pinyin || "",
-    example_ru: result.example_ru || ""
+    example_ru: result.example_ru || "",
+    example_pl: result.example_pl || "",
   };
 }
 async function generateStory() {
@@ -254,11 +264,17 @@ async function generateStory() {
   }
 }
 function buildCustomHanziPrompt(hanzi) {
-  return `Ты помогаешь мне создать персональную систему изучения китайских SIMPLIFIED иероглифов.
+  return `Ты помогаешь мне создать персональную систему изучения китайских иероглифов.
 
 Для иероглифа: ${hanzi}
 
 В ответе сгенерируй СТРОГО JSON со следующими ключами:
+
+hanzi:
+- сам знак
+
+hanzi_traditional:
+- тот же знак но в traditional форме
 
 pinyin:
 - пиньинь с тонами
@@ -289,7 +305,10 @@ deepseek_description_pl_paragraph_4:
 - краткий культурный или исторический аспект ПО ПОЛЬСКИ, только если уместно
 
 example_hanzi:
-- короткий пример предложения с этим иероглифом
+- короткий пример предложения с этим иероглифом в simplified
+
+example_hanzi_traditional:
+- тот же пример что и в example_hanzi но в традиционной форме
 
 example_pinying:
 - пиньинь примера
@@ -297,8 +316,11 @@ example_pinying:
 example_ru:
 - русский перевод примера
 
+example_pl:
+- польский перевод примера
+
 hsk:
-- цифра HSK уровня, на котором обычно появляется этот иероглиф (1-6), или null, если не определено
+- цифра старого HSK уровня, на котором обычно появляется этот иероглиф (1-6), или null, если не определено
 
 Ограничения:
 - каждый параграф — 2–4 предложения
@@ -472,6 +494,7 @@ function toggleDevMenu() {
     top: 0,
     behavior: "smooth"
   });
+  updateActiveBottomButtons();
 }
 function restoreFromInput() {
   const level = parseInt(
@@ -569,6 +592,7 @@ function goHome() {
     top: 0,
     behavior: "smooth"
   });
+  updateActiveBottomButtons();
 }
 function renderPath() {
   const maxId = Math.max(...HSK.map(c => c.id));
@@ -599,11 +623,14 @@ function renderPath() {
       <button class="srs-size-btn" style="display: none" onclick="toggleSrsSize()" id="srs-size-btn">${getHumanSrsLimit()}</button>
       <button class="examples-toggle" style="display: none" onclick="toggleExamplesList()">📖</button>
 
-      <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
-      <button class="dev-toggle" onclick="toggleDevMenu()">⚙︎</button>
-      <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
-      <button class="pinyin-toggle" onclick="togglePinyin()">ā</button>
-      <button class="tone-toggle" onclick="savePathScroll();toggleToneColors()">🌈</button>
+      <div>
+        <button id="speak-mute-btn" onclick="toggleSpeakMute()">${SPEAK_MUTED ? "🔇" : "🔊"}</button>
+        <button class="dev-toggle" onclick="toggleDevMenu()">⚙︎</button>
+        <button class="homo-toggle" onclick="toggleHomoList()">🅷</button>
+        <button class="traditional-toggle ${useTraditional() ? "" : "grayscale-ui"}" onclick="toggleTraditional()">🀄</button>
+        <button class="pinyin-toggle ${localStorage.getItem("usePinyin") === "false" ? "grayscale-ui" : ""}" onclick="togglePinyin()">ā</button>
+        <button class="tone-toggle ${useToneColors ? "" : "grayscale-ui"}" onclick="savePathScroll();toggleToneColors()">🌈</button>
+      </div>
     </div>
 
     <div id="srs-calendar" style="display:none"></div>
@@ -623,7 +650,7 @@ function renderPath() {
       <button class="ignore-rom-input-btn" onclick="ignoreSrsUntilLevel()">Save</button>
 
       <h1>Add custom hanzi</h1>
-      <input type="password" id="deepseek-api-key-input" placeholder="DeepSeek API key" value="${getDeepSeekApiKey()}"/>
+      <input type="password" style="display:none" id="deepseek-api-key-input" placeholder="DeepSeek API key" value="${getDeepSeekApiKey()}"/>
       <input type="text" id="custom-hanzi-input" placeholder="Hanzi" maxlength="8"/>
       <button class="custom-hanzi-input-btn" onclick="addCustomHanziFromInput()">Add</button>
       <div id="custom-hanzi-status" class="custom-hanzi-status"></div>
@@ -702,97 +729,9 @@ function togglePhoneticsList() {
 
   if (path) path.style.display = "none";
   if (customs) customs.style.display = "none";
+  updateActiveBottomButtons();
 }
-// function renderPhoneticsList() {
-//   var usePinyin =
-//     localStorage.getItem("usePinyin") !== "false";
 
-//   return PHONETICS_DB.map(function(group, groupIndex) {
-//     var charsHtml = group.chars.map(function(char, charIndex) {
-
-//       return (
-//         '<div class="phonetic-char-wrapper">' +
-
-//           '<div ' +
-//             'class="phonetic-char" ' +
-//             'onclick="togglePhoneticCharDetails(' +
-//               groupIndex + ', ' + charIndex +
-//             ')"' +
-//           '>' +
-
-//             renderToneColoredHanzi(char.hanzi) +
-
-//             '<div ' +
-//               'class="phonetic-char-pinyin preview-pinyin" ' +
-//               'style="visibility:' +
-//                 (usePinyin ? "visible" : "hidden") +
-//               ';"' +
-//             '>' +
-
-//               renderToneColoredPinyin(
-//                 char.hanzi,
-//                 char.pinyin || ""
-//               ) +
-
-//             '</div>' +
-
-//           '</div>' +
-
-//         '</div>'
-//       );
-
-//     }).join("");
-
-//     return (
-//       '<div class="phonetic-group">' +
-
-//         '<div class="phonetic-row">' +
-
-//           '<div ' +
-//             'class="phonetic-char phonetic-char-main" ' +
-//             'onclick="togglePhoneticGroup(' + groupIndex + ')"' +
-//           '>' +
-
-//             renderToneColoredHanzi(group.phonetic) +
-
-//             '<div ' +
-//               'class="phonetic-char-pinyin preview-pinyin" ' +
-//               'style="visibility:' +
-//                 (usePinyin ? "visible" : "hidden") +
-//               ';"' +
-//             '>' +
-
-//               renderToneColoredPinyin(
-//                 group.phonetic,
-//                 group.phonetic_pinyin || ""
-//               ) +
-
-//             '</div>' +
-
-//           '</div>' +
-
-//           '<div ' +
-//             'class="phonetic-group-chars" ' +
-//             'id="phonetic-group-' + groupIndex + '" ' +
-//             'style="display:none;"' +
-//           '>' +
-
-//             charsHtml +
-
-//           '</div>' +
-
-//         '</div>' +
-
-//         '<div ' +
-//           'class="phonetic-details-container" ' +
-//           'id="phonetic-details-' + groupIndex + '"' +
-//         '></div>' +
-
-//       '</div>'
-//     );
-
-//   }).join("");
-// }
 function renderPhoneticsList() {
   var usePinyin =
     localStorage.getItem("usePinyin") !== "false";
@@ -828,7 +767,7 @@ function renderPhoneticsList() {
             ')"' +
           '>' +
 
-            renderToneColoredHanzi(char.hanzi) +
+            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
             '<div ' +
               'class="phonetic-char-pinyin preview-pinyin" ' +
@@ -861,7 +800,7 @@ function renderPhoneticsList() {
             'onclick="togglePhoneticGroup(' + groupIndex + ')"' +
           '>' +
 
-            renderToneColoredHanzi(group.phonetic) +
+            renderDualHanzi(renderToneColoredHanzi(group.phonetic), renderToneColoredHanzi(group.phonetic_traditional || group.phonetic)) +
 
             '<div ' +
               'class="phonetic-char-pinyin preview-pinyin" ' +
@@ -924,9 +863,9 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
   container.dataset.currentIndex = charIndex;
 
   var translations = [
+    char.translation_pl,
     char.translation_en,
     char.translation_ru,
-    char.translation_pl
   ]
     .filter(Boolean)
     .join(" · ");
@@ -942,7 +881,7 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
 
             '<div class="phonetic-detail-hanzi" onclick="speak(\'' + char.hanzi + '\')">' +
 
-              renderToneColoredHanzi(char.hanzi) +
+              renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
               '<div class="phonetic-detail-pinyin">' +
 
@@ -969,10 +908,9 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
         translations +
       '</div>' +
 
-      '<div class="phonetic-detail-example-hanzi">' +
-        renderToneColoredHanzi(
-          char.example_hanzi || ""
-        ) +
+      '<div class="phonetic-detail-example-hanzi" onclick="speak(\'' + char.example_hanzi + '\')">' +
+
+        renderDualHanzi(renderToneColoredHanzi(char.example_hanzi), renderToneColoredHanzi(char.example_hanzi_traditional || char.example_hanzi)) +
       '</div>' +
 
       '<div class="phonetic-detail-example-pinyin">' +
@@ -1035,86 +973,10 @@ function toggleComponentsList() {
 
   if (path) path.style.display = "none";
   if (customs) customs.style.display = "none";
+  updateActiveBottomButtons();
 }
-// function renderComponentsList() {
-//   var usePinyin =
-//     localStorage.getItem("usePinyin") !== "false";
 
-//   return COMPONENTS_DB2.map(function(group, groupIndex) {
-//     var charsHtml = group.chars.map(function(char, charIndex) {
 
-//       return (
-//         '<div class="component-char-wrapper">' +
-
-//           '<div ' +
-//             'class="component-char" ' +
-//             'onclick="toggleComponentCharDetails(' +
-//               groupIndex + ', ' + charIndex +
-//             ')"' +
-//           '>' +
-//             renderToneColoredHanzi(char.hanzi) +
-
-//             '<div ' +
-//               'class="component-char-pinyin preview-pinyin" ' +
-//               'style="visibility:' +
-//                 (usePinyin ? "visible" : "hidden") +
-//               ';"' +
-//             '>' +
-//               renderToneColoredPinyin(
-//                 char.hanzi,
-//                 char.pinyin || ""
-//               ) +
-//             '</div>' +
-//           '</div>' +
-
-//         '</div>'
-//       );
-
-//     }).join("");
-
-//     return (
-//       '<div class="component-group">' +
-
-//         '<div class="component-row">' +
-
-//           '<div ' +
-//             'class="component-char component-char-main" ' +
-//             'onclick="toggleComponentGroup(' + groupIndex + ')"' +
-//           '>' +
-//             renderToneColoredHanzi(group.component) +
-
-//             '<div ' +
-//               'class="component-char-pinyin preview-pinyin" ' +
-//               'style="visibility:' +
-//                 (usePinyin ? "visible" : "hidden") +
-//               ';"' +
-//             '>' +
-//             '&nbsp;' +
-//             '</div>' +
-//           '</div>' +
-
-//           '<div ' +
-//             'class="component-group-chars" ' +
-//             'id="component-group-' + groupIndex + '" ' +
-//             'style="display:none;"' +
-//           '>' +
-
-//             charsHtml +
-
-//           '</div>' +
-
-//         '</div>' +
-
-//         '<div ' +
-//           'class="component-details-container" ' +
-//           'id="component-details-' + groupIndex + '"' +
-//         '></div>' +
-
-//       '</div>'
-//     );
-
-//   }).join("");
-// }
 function renderComponentsList() {
   var usePinyin =
     localStorage.getItem("usePinyin") !== "false";
@@ -1149,7 +1011,7 @@ function renderComponentsList() {
               groupIndex + ', ' + charIndex +
             ')"' +
           '>' +
-            renderToneColoredHanzi(char.hanzi) +
+            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
@@ -1178,7 +1040,7 @@ function renderComponentsList() {
             'class="component-char component-char-main" ' +
             'onclick="toggleComponentGroup(' + groupIndex + ')"' +
           '>' +
-            renderToneColoredHanzi(group.component) +
+            renderDualHanzi(renderToneColoredHanzi(group.component), renderToneColoredHanzi(group.component_traditional || group.component)) +
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
@@ -1186,7 +1048,10 @@ function renderComponentsList() {
                 (usePinyin ? "visible" : "hidden") +
               ';"' +
             '>' +
-            '&nbsp;' +
+            renderToneColoredPinyin(
+              group.component,
+              group.pinyin || ""
+            ) +
             '</div>' +
           '</div>' +
 
@@ -1262,9 +1127,9 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
   container.dataset.currentIndex = charIndex;
 
   var translations = [
-    char.translation_en,
+    char.translation_pl,
     char.translation_ru,
-    char.translation_pl
+    char.translation_en,
   ]
     .filter(function(item) {
       return Boolean(item);
@@ -1279,7 +1144,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
         '<div class="component-char-wrapper">' +
           '<div class="component-char">' +
             '<div class="component-detail-hanzi" onclick="speak(\'' + char.hanzi + '\')">' +
-              renderToneColoredHanzi(char.hanzi) +
+              renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
               '<div class="component-detail-pinyin">' +
                 renderToneColoredPinyin(
@@ -1302,9 +1167,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
       '</div>' +
 
       '<div class="component-detail-example-hanzi">' +
-        renderToneColoredHanzi(
-          char.example_hanzi || ""
-        ) +
+        renderDualHanzi(renderToneColoredHanzi(char.example_hanzi), renderToneColoredHanzi(char.example_hanzi_traditional || char.example_hanzi)) +
       '</div>' +
 
       '<div class="component-detail-example-pinyin">' +
@@ -1316,6 +1179,69 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
       '</div>' +
 
     '</div>';
+}
+
+function renderDualHanzi(simple, traditional) {
+  const cleanSimple =
+    String(simple)
+      .replace(/<[^>]+>/g, "")
+      .trim();
+
+  const cleanTraditional =
+    String(traditional)
+      .replace(/<[^>]+>/g, "")
+      .trim();
+
+  const hasDifference =
+    cleanSimple !== cleanTraditional;
+
+  return `
+    <span class="hanzi-simple ${
+      useTraditional() ? "hidden" : ""
+    } ${
+      hasDifference ? "traditional-diff" : ""
+    }">
+      ${simple}
+    </span>
+
+    <span class="hanzi-traditional ${
+      useTraditional() ? "" : "hidden"
+    } ${
+      hasDifference ? "traditional-diff" : ""
+    }">
+      ${traditional}
+    </span>
+  `;
+}
+function toggleTraditional() {
+  const next = !useTraditional();
+
+  localStorage.setItem(
+    "useTraditional",
+    String(next)
+  );
+
+  document
+    .querySelectorAll(".hanzi-simple")
+    .forEach(el => {
+      el.classList.toggle("hidden", next);
+    });
+
+  document
+    .querySelectorAll(".hanzi-traditional")
+    .forEach(el => {
+      el.classList.toggle("hidden", !next);
+    });
+
+  const btn =
+    document.querySelector(".traditional-toggle");
+
+  if (btn) {
+    btn.classList.toggle(
+      "grayscale-ui",
+      !next
+    );
+  }
 }
 function savePathScroll() {
   if (!location.hash || location.hash === "#") {
@@ -1352,7 +1278,7 @@ function renderCustomHanziList() {
           '>' +
 
             '<span class="custom-hanzi-main">' +
-              renderToneColoredHanzi(c.hanzi) +
+              renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi)) +
             '</span>' +
 
             '<span ' +
@@ -1678,6 +1604,15 @@ function togglePinyin() {
     String(next)
   );
 
+  const btn = document.querySelector(".pinyin-toggle");
+
+  if (btn) {
+    btn.classList.toggle(
+      "grayscale-ui",
+      !next
+    );
+  }
+
   repaintPinyinVisibility();
 }
 function repaintPinyinVisibility() {
@@ -1712,7 +1647,7 @@ function getHanziPreviewForLevel(level) {
       '<div>' +
 
         '<div>' +
-          renderToneColoredHanzi(c.hanzi) +
+          renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi)) +
         '</div>' +
 
         '<div ' +
@@ -1816,7 +1751,7 @@ function renderCustomChar(index = 0) {
       <div class="example-section">
         <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi || c.hanzi}')">${c.example_hanzi || c.hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying || ""}</p>
-        <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru || ""}</p>
+        <p class="section example-p example-p-pl" id="example-p-pl" style="visibility: hidden">${c.example_pl || ""}</p>
         ${
           c.hsk
           ? `<p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>`
@@ -1826,7 +1761,7 @@ function renderCustomChar(index = 0) {
 
       <div id="meaning" style="display:none">
         <div class="section">
-          Перевод: ${ [...(c.ru_translations || []).slice(0, 3), ...(c.translations || []).slice(0, 3)].join(", ") }
+          Перевод: ${ [...(c.pl_translations || []).slice(0, 3), ...(c.translations || []).slice(0, 3), ...(c.ru_translations || []).slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
@@ -1894,7 +1829,7 @@ function renderCustomChar(index = 0) {
   };
 
   const examplePinying = document.getElementById("example-p-pinying");
-  const exampleRu = document.getElementById("example-p-ru");
+  const examplePl = document.getElementById("example-p-pl");
   const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0;
 
@@ -1906,7 +1841,7 @@ function renderCustomChar(index = 0) {
       examplePinying.style.visibility = "visible";
     }
     if (exampleOpenClicks == 2) {
-      exampleRu.style.visibility = "visible";
+      examplePl.style.visibility = "visible";
       exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none';
     }
@@ -1973,13 +1908,13 @@ function renderLevel(level, index = 0) {
       <div class="example-section">
         <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
-        <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
+        <p class="section example-p example-p-pl" id="example-p-pl" style="visibility: hidden">${c.example_pl}</p>
         <p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>
       </div>
 
       <div id="meaning" style="display:none">
         <div class="section">
-          Перевод: ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+          Перевод: ${ [...(c.pl_translations || []).slice(0, 3), ...(c.translations || []).slice(0, 3), ...(c.ru_translations || []).slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
@@ -2050,7 +1985,7 @@ function renderLevel(level, index = 0) {
   };
 
   const examplePinying = document.getElementById("example-p-pinying");
-  const exampleRu = document.getElementById("example-p-ru");
+  const examplePl = document.getElementById("example-p-pl");
   const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0
 
@@ -2062,7 +1997,7 @@ function renderLevel(level, index = 0) {
       examplePinying.style.visibility = "visible";
     }
     if (exampleOpenClicks == 2) {
-      exampleRu.style.visibility = "visible";
+      examplePl.style.visibility = "visible";
       exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
     };
@@ -2164,13 +2099,13 @@ function renderSrs() {
       <div class="example-section">
         <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
-        <p class="section example-p example-p-ru" id="example-p-ru" style="visibility: hidden">${c.example_ru}</p>
+        <p class="section example-p example-p-pl" id="example-p-pl" style="visibility: hidden">${c.example_pl}</p>
         <p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>
       </div>
 
       <div id="meaning" style="display:none">
         <div class="section">
-          Перевод: ${ [...c.ru_translations.slice(0, 3), ...c.translations.slice(0, 3)].join(", ") }
+          Перевод: ${ [...(c.pl_translations || []).slice(0, 3), ...(c.translations || []).slice(0, 3), ...(c.ru_translations || []).slice(0, 3)].join(", ") }
         </div>
 
         ${homophonesHtml}
@@ -2241,7 +2176,7 @@ function renderSrs() {
   };
 
   const examplePinying = document.getElementById("example-p-pinying");
-  const exampleRu = document.getElementById("example-p-ru");
+  const examplePl = document.getElementById("example-p-pl");
   const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0
 
@@ -2253,7 +2188,7 @@ function renderSrs() {
       examplePinying.style.visibility = "visible";
     }
     if (exampleOpenClicks == 2) {
-      exampleRu.style.visibility = "visible";
+      examplePl.style.visibility = "visible";
       exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
     };
@@ -2313,6 +2248,7 @@ function toggleHomoList() {
   customs.style.display = homoList.style.display === "none" ? "block" : "none";
 
   collapseAllHomoGroups();
+  updateActiveBottomButtons();
 }
 function normalizeInitialTJQForSort(key) {
   if (!key) return key;
@@ -2397,7 +2333,7 @@ function renderHomoList() {
           <div class="homo-values">
             ${index[key].map(v => `
               <span class="homo-val" onclick="speak('${v.hanzi}')">
-                ${renderToneColoredHanzi(v.hanzi)} (${v.pinyin})
+                ${renderDualHanzi(renderToneColoredHanzi(v.hanzi), renderToneColoredHanzi(v.hanzi_traditional || v.hanzi))} &nbsp;(${v.pinyin})
               </span>
             `).join("")}
           </div>
@@ -2530,23 +2466,26 @@ function buildHomophoneIndex() {
   learned.forEach(entry => {
     const parts = splitHanziAndPinyin(entry.hanzi, entry.pinyin);
 
-    parts.forEach(({ hanzi, pinyin }) => {
+    parts.forEach(({ hanzi, pinyin }, i) => {
       const key = normalizePinyin(pinyin);
 
       if (!index[key]) {
         index[key] = [];
       }
 
-      // не дублируем
       if (!index[key].some(e => e.hanzi === hanzi)) {
-        index[key].push({ hanzi, pinyin });
+        index[key].push({
+          hanzi,
+          hanzi_traditional:
+            [...(entry.hanzi_traditional || entry.hanzi)][i] || hanzi,
+          pinyin
+        });
       }
     });
   });
 
   return index;
 }
-
 
 let HOMOPHONES_INDEX = null;
 
@@ -2599,14 +2538,29 @@ function normalizeForSort(word) {
 function useToneColors() {
   return localStorage.getItem("useToneColors") === "true";
 }
+function useTraditional() {
+  return localStorage.getItem("useTraditional") === "true";
+}
 
 function toggleToneColors() {
-  const next = !useToneColors();
+  const current =
+    localStorage.getItem("useToneColors") !== "false";
+
+  const next = !current;
 
   localStorage.setItem(
     "useToneColors",
     String(next)
   );
+
+  const btn = document.querySelector(".tone-toggle");
+
+  if (btn) {
+    btn.classList.toggle(
+      "grayscale-ui",
+      !next
+    );
+  }
 
   repaintToneColors();
 }
@@ -2703,7 +2657,7 @@ function renderExamplesList() {
             class="example-hanzi"
             onclick="event.stopPropagation(); speak('${c.example_hanzi}')"
           >
-            ${renderToneColoredHanzi(c.example_hanzi)}
+            ${renderDualHanzi(renderToneColoredHanzi(с.example_hanzi), renderToneColoredHanzi(с.example_hanzi_traditional || с.example_hanzi))}
           </div>
 
           <div class="example-arrow" id="example-arrow-${index}">
@@ -2717,8 +2671,8 @@ function renderExamplesList() {
             ${c.example_pinying || ""}
           </div>
 
-          <div class="example-ru">
-            ${c.example_ru || ""}
+          <div class="example-pl">
+            ${c.example_pl || c.example_ru || ""}
           </div>
         </div>
       </div>
@@ -2760,91 +2714,6 @@ function renderToneColoredPinyin(hanzi, pinyin) {
   }).join(" ");
 }
 
-function getGeneratedSentences() {
-  return JSON.parse(
-    localStorage.getItem("generatedSentences") || "[]"
-  );
-}
-
-function saveGeneratedSentences(items) {
-  localStorage.setItem(
-    "generatedSentences",
-    JSON.stringify(items)
-  );
-}
-function buildSentencePrompt() {
-  return `
-generate me ONE chinese sentence for HSK1-2-3.
-
-output STRICT JSON only with keys:
-
-{
-  "hanzi": "...",
-  "polish_translation": "...",
-  "pinying": "..."
-}
-
-rules:
-- short natural sentence
-- use common HSK1-3 vocabulary
-- no markdown
-- no explanations
-`;
-}
-async function generateSentence() {
-  const apiKey = getDeepSeekApiKey();
-
-  if (!apiKey) {
-    alert("Add DeepSeek API key first");
-    return;
-  }
-
-  try {
-    const response = await fetch(DEEPSEEK_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: DEEPSEEK_MODEL,
-        messages: [
-          {
-            role: "user",
-            content: buildSentencePrompt()
-          }
-        ],
-        temperature: 1
-      })
-    });
-
-    const payload = await response.json();
-
-    let content =
-      payload?.choices?.[0]?.message?.content || "{}";
-
-    content = content
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/```$/i, "")
-      .trim();
-
-    const result = JSON.parse(content);
-
-    const items = getGeneratedSentences();
-
-    items.unshift(result);
-
-    saveGeneratedSentences(items);
-
-    document.getElementById("generated-list").innerHTML =
-      renderGeneratedList();
-
-  } catch (e) {
-    console.error(e);
-    alert(e.message);
-  }
-}
 function toggleGeneratedList() {
   closeAllPanels();
   const panel = document.getElementById("generated-list");
@@ -2867,6 +2736,7 @@ function toggleGeneratedList() {
 
   if (homo) homo.style.display = "none";
   if (examples) examples.style.display = "none";
+  updateActiveBottomButtons();
 }
 
 function renderGeneratedList() {
@@ -2893,7 +2763,7 @@ function renderGeneratedList() {
                   class="example-hanzi"
                   onclick="event.stopPropagation(); speak('${c.hanzi}')"
                 >
-                  ${renderToneColoredHanzi(c.hanzi)}
+                  ${renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi))}
                 </div>
 
                 <div
@@ -2914,7 +2784,7 @@ function renderGeneratedList() {
                   ${c.pinying}
                 </div>
 
-                <div class="example-ru">
+                <div class="example-pl">
                   ${c.polish_translation || ""}
                 </div>
 
@@ -2926,7 +2796,114 @@ function renderGeneratedList() {
     }
   `;
 }
+function updateActiveBottomButtons() {
+  return
+  const hash = location.hash || "#";
 
+  const buttons = [
+    ".home-toggle",
+    "#srs-btn",
+    ".generated-toggle",
+    ".components-toggle",
+    ".phonetics-toggle",
+    ".dev-toggle",
+    ".homo-toggle"
+  ];
+
+  // reset all
+  buttons.forEach(selector => {
+    const el = document.querySelector(selector);
+
+    if (el) {
+      el.style.border = "";
+    }
+  });
+
+  const generatedVisible =
+    document.getElementById("generated-list")?.style.display === "block";
+
+  const componentsVisible =
+    document.getElementById("components-list")?.style.display === "block";
+
+  const phoneticsVisible =
+    document.getElementById("phonetics-list")?.style.display === "block";
+
+  const devVisible =
+    document.getElementById("restore-panel")?.style.display === "block";
+
+  const homoVisible =
+    document.getElementById("homo-list")?.style.display === "block";
+
+  const hasOverlayOpen =
+    generatedVisible ||
+    componentsVisible ||
+    phoneticsVisible ||
+    devVisible ||
+    homoVisible;
+
+  // HOME
+  if ((hash === "#" || !hash) && !hasOverlayOpen) {
+    document.querySelector(".home-toggle")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+
+  // SRS
+  if (hash.startsWith("#/srs")) {
+    document.querySelector("#srs-btn")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+
+  // GENERATED
+  if (generatedVisible) {
+    document.querySelector(".generated-toggle")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+
+  // COMPONENTS
+  if (componentsVisible) {
+    document.querySelector(".components-toggle")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+
+  // PHONETICS
+  if (phoneticsVisible) {
+    document.querySelector(".phonetics-toggle")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+
+  // DEV
+  if (devVisible) {
+    document.querySelector(".dev-toggle")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+
+  // HOMO
+  if (homoVisible) {
+    document.querySelector(".homo-toggle")?.style.setProperty(
+      "border",
+      "1px solid gold",
+      "important"
+    );
+  }
+}
 (async function init() {
   await Promise.all([
     loadHSK(),
@@ -3128,6 +3105,7 @@ function renderGeneratedList() {
     }
   }
   router();
+  updateActiveBottomButtons();
 
   document.addEventListener("click", function (e) {
     const header = e.target.closest(".homo-letter-section");
