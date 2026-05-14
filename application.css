@@ -100,7 +100,12 @@ button {
 .hanzi {
   font-size: 300px;
   text-align: center;
+  width: max-content;
+  margin: 0 auto;
+  background: white;
+  color: black;
 }
+
 .pinyin {
   font-size: 60px;
   text-align: center;
@@ -118,10 +123,31 @@ button {
 }
 .example-p-hanzi {
   font-size: 10rem;
+  line-height: calc(10rem + 27px);
 }
+.example-section .hanzi-simple,
+.example-section .hanzi-traditional {
+  display: flex;
+  font-size: 130px;
+  text-align: center;
+}
+
+.phonetic-detail-example-hanzi .hanzi-simple,
+.phonetic-detail-example-hanzi .hanzi-traditional,
+.component-detail-example-hanzi .hanzi-simple,
+.component-detail-example-hanzi .hanzi-traditional {
+  display: flex;
+}
+
 .example-p-pinying {
   font-size: 5rem;
+  margin-top: 20px;
+  display: none;
 }
+.example-p-pl {
+  margin-top: 20px;
+}
+
 .example-p-hsk {
   opacity: 0.5;
   padding-top: 30px;
@@ -143,15 +169,19 @@ button {
   position: fixed;
   width: 70%;
   z-index: 99;
-  bottom: 300px;
+  bottom: 350px;
   left: 0px;
+  background: none;
+  border: none;
 }
 #incremental-reveal-pinyin {
   position: fixed;
   width: 30%;
   z-index: 99;
-  bottom: 300px;
+  bottom: 350px;
   right: 0px;
+  background: none;
+  border: none;
 }
 
 .pinyin-row {
@@ -263,6 +293,7 @@ button.locked {
 .ignore-btn {
   width: 20%;
   margin-left: 2%;
+  float: left;
 }
 .top-controls {
   display: flex;
@@ -415,6 +446,7 @@ button.completed .level-number{
   color: black;
   font-size: 130px;
   font-weight: 500;
+  line-height: 5rem;
 }
 
 .custom-hanzi-main {
@@ -427,7 +459,7 @@ button.completed .level-number{
   opacity: 0.85;
 }
 .preview-pinyin {
-  font-size: 45px;
+  font-size: 55px;
   margin-top: -5px;
 }
 
@@ -530,11 +562,6 @@ button.completed .level-number{
 
 .example-details.open {
   display: block;
-}
-
-.example-pinyin {
-  font-size: 70px;
-  margin-bottom: 10px;
 }
 
 .example-pl {
@@ -659,25 +686,15 @@ button.completed .level-number{
   color: black;
 }
 
-.component-detail-example-hanzi .tone-char {
-  background: white;
-  margin: -1px;
-}
+.component-detail-example-hanzi .tone-char,
 .phonetic-detail-example-hanzi .tone-char {
-  background: white;
   margin: -1px;
-}
-
-.component-detail-example-pinyin {
-  margin-top: 15px;
-  font-size: 55px;
 }
 
 .component-detail-example-pl {
   margin-top: 15px;
   font-size: 55px;
 }
-
 
 .component-char-wrapper {
   flex-direction: column;
@@ -728,8 +745,7 @@ button.completed .level-number{
 
   font-size: 130px;
   font-weight: 500;
-
-  cursor: pointer;
+  line-height: 5rem;
 }
 
 .phonetic-group-chars {
@@ -790,11 +806,6 @@ button.completed .level-number{
   color: black;
 }
 
-.phonetic-detail-example-pinyin {
-  margin-top: 15px;
-  font-size: 55px;
-}
-
 .phonetic-detail-example-pl {
   margin-top: 15px;
   font-size: 55px;
@@ -807,6 +818,24 @@ button.completed .level-number{
 .hidden {
   display: none !important;
 }
+.dual-sentence-char {
+  background: white;
+  color: black;
+  margin: -1px;
+  width: 170px;
+  text-align: center;
+}
+.example-row .dual-sentence-char {
+  display: inline-flex;
+  flex-direction: column;
+}
+.example-row .hanzi-simple,
+.example-row .hanzi-traditional {
+  display: inline-table;
+}
+.hanzi:has(.traditional-diff),
+.dual-sentence-char:has(.traditional-diff),
+.dual-sentence-char.traditional-diff,
 .custom-hanzi-card:has(.traditional-diff),
 .level-hanzi:has(.traditional-diff),
 .component-char:has(.traditional-diff),

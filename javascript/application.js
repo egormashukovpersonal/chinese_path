@@ -908,13 +908,8 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
         translations +
       '</div>' +
 
-      '<div class="phonetic-detail-example-hanzi" onclick="speak(\'' + char.example_hanzi + '\')">' +
-
-        renderDualHanzi(renderToneColoredHanzi(char.example_hanzi), renderToneColoredHanzi(char.example_hanzi_traditional || char.example_hanzi)) +
-      '</div>' +
-
-      '<div class="phonetic-detail-example-pinyin">' +
-        (char.example_pinyin || "") +
+      '<div class="phonetic-detail-example-hanzi">' +
+        `<div onclick="speak('${char.example_hanzi}')">${renderDualSentence(char.example_hanzi, char.example_hanzi_traditional || char.example_hanzi)}</div>` +
       '</div>' +
 
       '<div class="phonetic-detail-example-pl">' +
@@ -1167,11 +1162,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
       '</div>' +
 
       '<div class="component-detail-example-hanzi">' +
-        renderDualHanzi(renderToneColoredHanzi(char.example_hanzi), renderToneColoredHanzi(char.example_hanzi_traditional || char.example_hanzi)) +
-      '</div>' +
-
-      '<div class="component-detail-example-pinyin">' +
-        char.example_pinyin +
+        `<div onclick="speak('${char.example_hanzi}')">${renderDualSentence(char.example_hanzi, char.example_hanzi_traditional || char.example_hanzi)}</div>` +
       '</div>' +
 
       '<div class="component-detail-example-pl">' +
@@ -1196,21 +1187,21 @@ function renderDualHanzi(simple, traditional) {
     cleanSimple !== cleanTraditional;
 
   return `
-    <span class="hanzi-simple ${
+    <div class="hanzi-simple ${
       useTraditional() ? "hidden" : ""
     } ${
       hasDifference ? "traditional-diff" : ""
     }">
       ${simple}
-    </span>
+    </div>
 
-    <span class="hanzi-traditional ${
+    <div class="hanzi-traditional ${
       useTraditional() ? "" : "hidden"
     } ${
       hasDifference ? "traditional-diff" : ""
     }">
       ${traditional}
-    </span>
+    </div>
   `;
 }
 function toggleTraditional() {
@@ -1731,11 +1722,12 @@ function renderCustomChar(index = 0) {
           : `<button class="next-btn" onclick="location.hash='#'">✓</button>`
       }
       <button id="example-open-btn" class="example-open-btn">↓</button>
+      ${renderStudyToggles()}
     </div>
 
 
     <div class="char-card custom-study-card">
-      <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
+      <div class="hanzi" onclick="speak('${c.hanzi}')">${renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi))}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
         <button id="toggle-meaning" class="secondary-btn">Pinying</button>
@@ -1749,7 +1741,7 @@ function renderCustomChar(index = 0) {
       </div>
 
       <div class="example-section">
-        <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi || c.hanzi}')">${c.example_hanzi || c.hanzi}</p>
+        <div onclick="speak('${c.example_hanzi}')">${renderDualSentence(c.example_hanzi, c.example_hanzi_traditional || c.example_hanzi)}</div>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying || ""}</p>
         <p class="section example-p example-p-pl" id="example-p-pl" style="visibility: hidden">${c.example_pl || ""}</p>
         ${
@@ -1868,9 +1860,6 @@ function renderLevel(level, index = 0) {
     `
     : "";
 
-  // <h1>Level ${level}</h1>
-  // <div class="progress">${index + 1} / ${chars.length}</div>
-
   app.innerHTML = `
     <div class="fixed-bottom">
       <button class="back-btn" onclick="goBack(${level}, ${index})">←</button>
@@ -1888,11 +1877,12 @@ function renderLevel(level, index = 0) {
           : `<button class="next-btn" onclick="finishLevel(${level})">✓</button>`
       }
       <button id="example-open-btn" class="example-open-btn">↓</button>
+      ${renderStudyToggles()}
     </div>
 
 
     <div class="char-card">
-      <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
+      <div class="hanzi" onclick="speak('${c.hanzi}')">${renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi))}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
         <button id="toggle-meaning" class="secondary-btn">Pinying</button>
@@ -1906,7 +1896,7 @@ function renderLevel(level, index = 0) {
       </div>
 
       <div class="example-section">
-        <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
+        <div onclick="speak('${c.example_hanzi}')">${renderDualSentence(c.example_hanzi, c.example_hanzi_traditional || c.example_hanzi)}</div>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
         <p class="section example-p example-p-pl" id="example-p-pl" style="visibility: hidden">${c.example_pl}</p>
         <p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>
@@ -2005,6 +1995,50 @@ function renderLevel(level, index = 0) {
 
   incrementalRevealBtn.click();
 }
+function renderStudyToggles() {
+  return `
+    <div style="clear: both;">
+      <button class="traditional-toggle ${useTraditional() ? "" : "grayscale-ui"}" onclick="toggleTraditional()">🀄</button>
+      <button class="pinyin-toggle ${localStorage.getItem("usePinyin") === "false" ? "grayscale-ui" : ""}" onclick="togglePinyin()">ā</button>
+      <button class="tone-toggle ${useToneColors ? "" : "grayscale-ui"}" onclick="toggleToneColors()">🌈</button>
+    </div>
+  `;
+}
+
+function renderDualSentence(simple, traditional) {
+  const s = [...(simple || "")];
+  const t = [...(traditional || simple || "")];
+
+  const renderSide = (chars, other) =>
+    chars.map((ch, i) => `
+      <div class="dual-sentence-char ${
+        ch !== (other[i] || "")
+          ? "traditional-diff"
+          : ""
+      }">
+        ${renderToneColoredHanzi(ch)}
+
+        <div
+          class="preview-pinyin dual-sentence-pinyin"
+          style="visibility:${
+            localStorage.getItem("usePinyin") !== "false"
+              ? "visible"
+              : "hidden"
+          }"
+        >
+          ${renderToneColoredPinyin(
+            ch,
+            getCharPinyin(ch)
+          )}
+        </div>
+      </div>
+    `).join("");
+
+  return renderDualHanzi(
+    renderSide(s, t),
+    renderSide(t, s)
+  );
+}
 function maskedPinyin(fullPinyin, count) {
   return [...fullPinyin].map((ch, i) => {
     if (ch === " ") return " ";
@@ -2081,9 +2115,10 @@ function renderSrs() {
         ${isLast ? "✓" : "→"}
       </button>
       <button id="example-open-btn" class="example-open-btn">↓</button>
+      ${renderStudyToggles()}
     </div>
     <div class="char-card">
-      <div class="hanzi" onclick="speak('${c.hanzi}')">${c.hanzi}</div>
+      <div class="hanzi" onclick="speak('${c.hanzi}')">${renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi))}</div>
 
       <div style="display:flex; gap:20px; justify-content:center;">
         <button id="toggle-meaning" class="secondary-btn">Pinying</button>
@@ -2097,7 +2132,7 @@ function renderSrs() {
       </div>
 
       <div class="example-section">
-        <p class="section example-p example-p-hanzi" onclick="speak('${c.example_hanzi}')">${c.example_hanzi}</p>
+        <div onclick="speak('${c.example_hanzi}')">${renderDualSentence(c.example_hanzi, c.example_hanzi_traditional || c.example_hanzi)}</div>
         <p class="section example-p example-p-pinying" id="example-p-pinying" style="visibility: hidden">${c.example_pinying}</p>
         <p class="section example-p example-p-pl" id="example-p-pl" style="visibility: hidden">${c.example_pl}</p>
         <p class="section example-p example-p-hsk" id="example-p-hsk" style="visibility: hidden">HSK ${c.hsk || ""}</p>
@@ -2667,10 +2702,6 @@ function renderExamplesList() {
         </div>
 
         <div class="example-details" id="example-details-${index}">
-          <div class="example-pinyin">
-            ${c.example_pinying || ""}
-          </div>
-
           <div class="example-pl">
             ${c.example_pl || c.example_ru || ""}
           </div>
@@ -2763,14 +2794,14 @@ function renderGeneratedList() {
                   class="example-hanzi"
                   onclick="event.stopPropagation(); speak('${c.hanzi}')"
                 >
-                  ${renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi))}
+                  ${renderDualSentence(c.hanzi, c.hanzi_traditional || c.hanzi)}
                 </div>
 
                 <div
                   class="example-arrow"
                   id="example-arrow-${index}"
                 >
-                  ‹
+                  ◀
                 </div>
 
               </div>
@@ -2779,11 +2810,6 @@ function renderGeneratedList() {
                 class="example-details"
                 id="example-details-${index}"
               >
-
-                <div class="example-pinyin">
-                  ${c.pinying}
-                </div>
-
                 <div class="example-pl">
                   ${c.polish_translation || ""}
                 </div>
@@ -2912,7 +2938,7 @@ function updateActiveBottomButtons() {
     loadPhoneticsDb()
   ]);
 
-  if (false) {
+  if (true) {
     const existingCustoms = getCustomChars();
 
     if (existingCustoms.length === 0) {
@@ -2921,6 +2947,7 @@ function updateActiveBottomButtons() {
         {
           id: 100001,
           custom: true,
+          hsk: 1,
           hanzi: "妈",
           pinyin: "mā",
           translations: ["mom"],
@@ -2930,6 +2957,7 @@ function updateActiveBottomButtons() {
         {
           id: 100002,
           custom: true,
+          hsk: 1,
           hanzi: "麻",
           pinyin: "má",
           translations: ["hemp"],
@@ -2939,6 +2967,7 @@ function updateActiveBottomButtons() {
         {
           id: 100003,
           custom: true,
+          hsk: 1,
           hanzi: "马",
           pinyin: "mǎ",
           translations: ["horse"],
@@ -2948,6 +2977,7 @@ function updateActiveBottomButtons() {
         {
           id: 100004,
           custom: true,
+          hsk: 1,
           hanzi: "骂",
           pinyin: "mà",
           translations: ["scold"],
@@ -2957,6 +2987,7 @@ function updateActiveBottomButtons() {
         {
           id: 100005,
           custom: true,
+          hsk: 1,
           hanzi: "吗",
           pinyin: "ma",
           translations: ["question particle"],
@@ -2967,6 +2998,7 @@ function updateActiveBottomButtons() {
         {
           id: 100006,
           custom: true,
+          hsk: 1,
           hanzi: "天",
           pinyin: "tiān",
           translations: ["sky"],
@@ -2976,6 +3008,7 @@ function updateActiveBottomButtons() {
         {
           id: 100007,
           custom: true,
+          hsk: 1,
           hanzi: "田",
           pinyin: "tián",
           translations: ["field"],
@@ -2985,6 +3018,7 @@ function updateActiveBottomButtons() {
         {
           id: 100008,
           custom: true,
+          hsk: 1,
           hanzi: "舔",
           pinyin: "tiǎn",
           translations: ["lick"],
@@ -2994,6 +3028,7 @@ function updateActiveBottomButtons() {
         {
           id: 100009,
           custom: true,
+          hsk: 1,
           hanzi: "跳",
           pinyin: "tiào",
           translations: ["jump"],
@@ -3003,6 +3038,7 @@ function updateActiveBottomButtons() {
         {
           id: 100010,
           custom: true,
+          hsk: 1,
           hanzi: "的",
           pinyin: "de",
           translations: ["possessive particle"],
@@ -3013,6 +3049,7 @@ function updateActiveBottomButtons() {
         {
           id: 100011,
           custom: true,
+          hsk: 1,
           hanzi: "东",
           pinyin: "dōng",
           translations: ["east"],
@@ -3022,6 +3059,7 @@ function updateActiveBottomButtons() {
         {
           id: 100012,
           custom: true,
+          hsk: 1,
           hanzi: "懂",
           pinyin: "dǒng",
           translations: ["understand"],
@@ -3031,6 +3069,7 @@ function updateActiveBottomButtons() {
         {
           id: 100013,
           custom: true,
+          hsk: 1,
           hanzi: "动",
           pinyin: "dòng",
           translations: ["move"],
@@ -3040,6 +3079,7 @@ function updateActiveBottomButtons() {
         {
           id: 100014,
           custom: true,
+          hsk: 1,
           hanzi: "都",
           pinyin: "dōu",
           translations: ["all"],
@@ -3049,6 +3089,7 @@ function updateActiveBottomButtons() {
         {
           id: 100015,
           custom: true,
+          hsk: 1,
           hanzi: "读",
           pinyin: "dú",
           translations: ["read"],
@@ -3059,6 +3100,7 @@ function updateActiveBottomButtons() {
         {
           id: 100016,
           custom: true,
+          hsk: 1,
           hanzi: "花",
           pinyin: "huā",
           translations: ["flower"],
@@ -3068,6 +3110,7 @@ function updateActiveBottomButtons() {
         {
           id: 100017,
           custom: true,
+          hsk: 1,
           hanzi: "滑",
           pinyin: "huá",
           translations: ["slippery"],
@@ -3077,6 +3120,7 @@ function updateActiveBottomButtons() {
         {
           id: 100018,
           custom: true,
+          hsk: 1,
           hanzi: "话",
           pinyin: "huà",
           translations: ["speech"],
@@ -3086,6 +3130,7 @@ function updateActiveBottomButtons() {
         {
           id: 100019,
           custom: true,
+          hsk: 1,
           hanzi: "火",
           pinyin: "huǒ",
           translations: ["fire"],
@@ -3095,6 +3140,7 @@ function updateActiveBottomButtons() {
         {
           id: 100020,
           custom: true,
+          hsk: 1,
           hanzi: "灰",
           pinyin: "huī",
           translations: ["gray"],
