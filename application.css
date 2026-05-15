@@ -137,6 +137,7 @@ button {
 .component-detail-example-hanzi .hanzi-simple,
 .component-detail-example-hanzi .hanzi-traditional {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .example-p-pinying {
