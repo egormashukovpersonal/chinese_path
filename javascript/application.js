@@ -1721,7 +1721,7 @@ function renderCustomChar(index = 0) {
           ? `<button class="next-btn" onclick="location.hash='#/custom/${index + 1}'">→</button>`
           : `<button class="next-btn" onclick="location.hash='#'">✓</button>`
       }
-      <button id="example-open-btn" class="example-open-btn">↓</button>
+      <button id="open-all-desc-btn" class="open-all-desc-btn">↓</button>
       ${renderStudyToggles()}
     </div>
 
@@ -1771,7 +1771,7 @@ function renderCustomChar(index = 0) {
     </div>
   `;
 
-  const openExampleBtn = document.getElementById("example-open-btn");
+  const openExampleBtn = document.getElementById("open-all-desc-btn");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -1826,16 +1826,18 @@ function renderCustomChar(index = 0) {
   let exampleOpenClicks = 0;
 
   document.addEventListener("click", (e) => {
-    if (!e.target || e.target.id !== "example-open-btn") return;
+    if (!e.target || e.target.id !== "open-all-desc-btn") return;
 
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
       examplePinying.style.visibility = "visible";
-    }
-    if (exampleOpenClicks == 2) {
       examplePl.style.visibility = "visible";
       exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none';
+      toggleBtn.click()
+      toggleBtn.click()
+    }
+    if (exampleOpenClicks == 2) {
     }
   });
 
@@ -1876,7 +1878,7 @@ function renderLevel(level, index = 0) {
           ? `<button class="next-btn" onclick="location.hash='#/level/${level}/${index + 1}'">→</button>`
           : `<button class="next-btn" onclick="finishLevel(${level})">✓</button>`
       }
-      <button id="example-open-btn" class="example-open-btn">↓</button>
+      <button id="open-all-desc-btn" class="open-all-desc-btn">↓</button>
       ${renderStudyToggles()}
     </div>
 
@@ -1922,7 +1924,7 @@ function renderLevel(level, index = 0) {
     </div>
   `;
 
-  const openExampleBtn = document.getElementById("example-open-btn");
+  const openExampleBtn = document.getElementById("open-all-desc-btn");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -1980,17 +1982,19 @@ function renderLevel(level, index = 0) {
   let exampleOpenClicks = 0
 
   document.addEventListener("click", (e) => {
-    if (!e.target || e.target.id !== "example-open-btn") return;
+    if (!e.target || e.target.id !== "open-all-desc-btn") return;
 
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
       examplePinying.style.visibility = "visible";
-    }
-    if (exampleOpenClicks == 2) {
       examplePl.style.visibility = "visible";
       exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
+      toggleBtn.click()
+      toggleBtn.click()
     };
+    // if (exampleOpenClicks == 2) {
+    // }
   });
 
   incrementalRevealBtn.click();
@@ -2114,7 +2118,7 @@ function renderSrs() {
       <button class="next-srs-btn"  onclick="nextSrs()">
         ${isLast ? "✓" : "→"}
       </button>
-      <button id="example-open-btn" class="example-open-btn">↓</button>
+      <button id="open-all-desc-btn" class="open-all-desc-btn">↓</button>
       ${renderStudyToggles()}
     </div>
     <div class="char-card">
@@ -2158,7 +2162,7 @@ function renderSrs() {
     </div>
   `;
 
-  const openExampleBtn = document.getElementById("example-open-btn");
+  const openExampleBtn = document.getElementById("open-all-desc-btn");
   const toggleBtn = document.getElementById("toggle-meaning");
   const meaning = document.getElementById("meaning");
   const pinyin = document.getElementById("toggle-pinyin");
@@ -2216,17 +2220,19 @@ function renderSrs() {
   let exampleOpenClicks = 0
 
   document.addEventListener("click", (e) => {
-    if (!e.target || e.target.id !== "example-open-btn") return;
+    if (!e.target || e.target.id !== "open-all-desc-btn") return;
 
     exampleOpenClicks++;
     if (exampleOpenClicks == 1) {
       examplePinying.style.visibility = "visible";
-    }
-    if (exampleOpenClicks == 2) {
       examplePl.style.visibility = "visible";
       exampleHsk.style.visibility = "visible";
       openExampleBtn.style.display = 'none'
+      toggleBtn.click()
+      toggleBtn.click()
     };
+    if (exampleOpenClicks == 2) {
+    }
   });
 
   incrementalRevealBtn.click();
