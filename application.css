@@ -128,6 +128,7 @@ button {
 .example-section .hanzi-simple,
 .example-section .hanzi-traditional {
   display: flex;
+  flex-wrap: wrap;
   font-size: 130px;
   text-align: center;
 }
@@ -412,7 +413,7 @@ button.completed .level-number{
 
 .homo-val {
   white-space: nowrap;
-  width: 100%;
+  display: flex;
 }
 
 .homo-val .hanzi-traditional,
