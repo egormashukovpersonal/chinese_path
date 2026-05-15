@@ -1791,6 +1791,7 @@ function renderCustomChar(index = 0) {
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
       toggleBtn.style.width = '100%';
+      toggleBtn.style.visibility = 'hidden';
       pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
     }
     if (clicks == 2) {
@@ -1944,6 +1945,7 @@ function renderLevel(level, index = 0) {
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
       toggleBtn.style.width = '100%'
+      toggleBtn.style.visibility = 'hidden';
       pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
     }
     if (clicks == 2) {
@@ -2182,6 +2184,7 @@ function renderSrs() {
       pinyin.style.display = "block";
       toggleBtn.textContent = "Open";
       toggleBtn.style.width = '100%'
+      toggleBtn.style.visibility = 'hidden';
       pinyinTextEl.textContent = maskedPinyin(fullPinyin, fullPinyin.length);
     }
     if (clicks == 2) {
