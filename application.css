@@ -342,7 +342,7 @@ button.locked {
   margin-bottom: 40px;
 }
 h1 {
-  font-size: 100px;
+  font-size: 70px;
   clear: both;
 }
 .header-h2 {
@@ -578,6 +578,15 @@ button.completed .level-number{
   font-size: 70px;
   background: none;
   width: 15.5%;
+}
+#notebook-btn {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 15.5%;
+}
+#notebook-list {
+  padding-bottom: 500px;
 }
 .components-toggle {
   border: none !important;
@@ -843,4 +852,64 @@ button.completed .level-number{
 .component-char:has(.traditional-diff),
 .phonetic-char:has(.traditional-diff) {
   background: wheat;
+}
+
+.generated-words-list .example-header {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.generated-words-list .example-row {
+  border: none;
+  background: none;
+  display: flex;
+  margin: 0;
+  margin-left: 25px;
+}
+
+.generated-words-list .example-pl {
+  position: relative;
+
+  font-size: 55px;
+
+  color: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 70px;
+
+  transition:
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.generated-words-list .example-pl.revealed {
+  color: white;
+}
+
+.generated-words-list .example-pl::before {
+  content: "👁️";
+  position: absolute;
+  right: 150px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 55px;
+  transition: opacity 0.15s ease;
+}
+
+.generated-words-list .example-pl.revealed::before {
+  opacity: 0;
+}
+
+.generated-word-remove-btn {
+  position: absolute;
+  right: 0;
+  border: none;
+  background: none;
+  width: 70px;
+  height: 70px;
+  font-size: 55px;
+  cursor: pointer;
+  color: gray;
 }

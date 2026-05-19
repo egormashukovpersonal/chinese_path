@@ -559,6 +559,7 @@ function closeAllPanels() {
     "generated-list",
     "components-list",
     "phonetics-list",
+    "notebook-list",
     "restore-panel"
   ].forEach(id => {
     const el = document.getElementById(id);
@@ -616,6 +617,7 @@ function renderPath() {
     <div class="fixed-bottom">
       <button class="home-toggle" onclick="goHome()">🏠</button>
       <button id='srs-btn' onclick='startSrsSession()'>🧠</button>
+      <button id='notebook-btn' onclick='toggleNotebookPage()'>📒</button>
       <button class="generated-toggle" onclick="toggleGeneratedList()">✨</button>
       <button class="components-toggle" onclick="toggleComponentsList()">🧩</button>
       <button class="phonetics-toggle" onclick="togglePhoneticsList()">🧬</button>
@@ -639,6 +641,7 @@ function renderPath() {
     <div id="generated-list" style="display:none"></div>
     <div id="components-list" style="display:none"></div>
     <div id="phonetics-list" style="display:none"></div>
+    <div id="notebook-list" style="display:none"></div>
 
     <div id="restore-panel" style="display:none">
       <h1>Open levels til</h1>
@@ -654,8 +657,12 @@ function renderPath() {
       <input type="text" id="custom-hanzi-input" placeholder="Hanzi" maxlength="8"/>
       <button class="custom-hanzi-input-btn" onclick="addCustomHanziFromInput()">Add</button>
       <div id="custom-hanzi-status" class="custom-hanzi-status"></div>
-    </div>
 
+      <h1>Add word</h1>
+      <input type="text" id="custom-word-input" placeholder="Chinese word" maxlength="12" />
+      <button class="custom-hanzi-input-btn" onclick="addCustomWordFromInput()" >Add</button>
+      <div id="custom-word-status" class="custom-hanzi-status" ></div>
+    </div>
     <div id="srs-size-menu" class="srs-size-menu" style="display:none">
       <button class="select-srs-size-btn" onclick="selectSrsSize(5)">5</button>
       <button class="select-srs-size-btn" onclick="selectSrsSize(10)">10</button>
@@ -704,6 +711,229 @@ function renderPath() {
       });
     });
   }
+}
+function getCustomWords() {
+  return JSON.parse(
+    localStorage.getItem("customWords") || "[]"
+  );
+}
+
+function saveCustomWords(words) {
+  localStorage.setItem(
+    "customWords",
+    JSON.stringify(words)
+  );
+}
+
+function buildCustomWordPrompt(word) {
+  return `
+Ты помогаешь мне создавать коллекцию китайских слов.
+
+Вот полноценное китайское слово из 2-3 иероглифов:
+
+${word}
+
+Верни СТРОГО JSON:
+
+{
+  "hanzi": "...",
+  "hanzi_traditional": "...",
+  "translation_pl": "..."
+}
+
+Правила:
+- hanzi_traditional должен быть в traditional форме
+- translation_pl очень короткий
+- только 1 перевод
+- без markdown
+- без объяснений
+- только JSON
+`;
+}
+
+async function addCustomWordFromInput() {
+  const input =
+    document.getElementById("custom-word-input");
+
+  const status =
+    document.getElementById("custom-word-status");
+
+  const apiKey =
+    getDeepSeekApiKey();
+
+  const word =
+    (input?.value || "").trim();
+
+  if (!word) return;
+
+  const existing = getCustomWords()
+    .find(x => x.hanzi === word);
+
+  if (existing) {
+    status.textContent = "Already exists";
+    return;
+  }
+
+  status.textContent = "Generating...";
+
+  try {
+    const response = await fetch(
+      DEEPSEEK_API_URL,
+      {
+        method: "POST",
+        headers: {
+          "Authorization":
+            `Bearer ${apiKey}`,
+          "Content-Type":
+            "application/json"
+        },
+        body: JSON.stringify({
+          model: DEEPSEEK_MODEL,
+          messages: [
+            {
+              role: "user",
+              content:
+                buildCustomWordPrompt(word)
+            }
+          ],
+          temperature: 0.2
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `DeepSeek error ${response.status}`
+      );
+    }
+
+    const payload = await response.json();
+
+    let content =
+      payload?.choices?.[0]?.message?.content || "{}";
+
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    const result = JSON.parse(content);
+
+    const words = getCustomWords();
+
+    words.unshift({
+      hanzi: result.hanzi || word,
+      hanzi_traditional: result.hanzi_traditional || result.hanzi || word,
+      translation_pl: result.translation_pl || ""
+    });
+
+    saveCustomWords(words);
+
+    input.value = "";
+
+    status.textContent = "Saved";
+
+    renderNotebookList();
+  } catch (e) {
+    console.error(e);
+
+    status.textContent =
+      `Error: ${e.message}`;
+  }
+}
+
+function renderNotebookList() {
+  const container =
+    document.getElementById("notebook-list");
+
+  if (!container) return;
+
+  const words = getCustomWords();
+
+  container.innerHTML = `
+    <div class="generated-words-list">
+
+      ${words.map(word => `
+
+        <div class="example-row">
+
+          <div class="example-header">
+
+            <div class="example-hanzi" onclick="speak('${word.hanzi}')">
+              ${renderDualSentence(
+                word.hanzi,
+                word.hanzi_traditional || word.hanzi
+              )}
+            </div>
+
+          </div>
+
+          <div class="example-details open">
+
+            <div
+              class="example-pl"
+              onclick="revealNotebookTranslation(this)"
+            >
+              ${word.translation_pl}
+
+              <button
+                class="generated-word-remove-btn"
+                onclick="event.stopPropagation(); removeNotebookWord('${word.hanzi}')"
+              >
+                −
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+  `;
+}
+function removeNotebookWord(hanzi) {
+  const words = getCustomWords()
+    .filter(word => word.hanzi !== hanzi);
+
+  saveCustomWords(words);
+
+  renderNotebookList();
+}
+function toggleNotebookPage() {
+  const panel =
+    document.getElementById("notebook-list");
+
+  const opening =
+    panel.style.display === "none";
+
+  closeAllPanels();
+
+  if (!opening) {
+    return;
+  }
+
+  panel.style.display = "block";
+
+  renderNotebookList();
+
+  const path =
+    document.getElementById("path");
+
+  const customs =
+    document.getElementById("custom-hanzi-list");
+
+  if (path) {
+    path.style.display = "none";
+  }
+
+  if (customs) {
+    customs.style.display = "none";
+  }
+
+  updateActiveBottomButtons();
 }
 function togglePhoneticsList() {
   const panel = document.getElementById("phonetics-list");
@@ -2863,6 +3093,9 @@ function updateActiveBottomButtons() {
   const phoneticsVisible =
     document.getElementById("phonetics-list")?.style.display === "block";
 
+  const notebooksVisible =
+    document.getElementById("notebook-list")?.style.display === "block";
+
   const devVisible =
     document.getElementById("restore-panel")?.style.display === "block";
 
@@ -2873,6 +3106,7 @@ function updateActiveBottomButtons() {
     generatedVisible ||
     componentsVisible ||
     phoneticsVisible ||
+    notebooksVisible ||
     devVisible ||
     homoVisible;
 
@@ -2938,6 +3172,42 @@ function updateActiveBottomButtons() {
       "important"
     );
   }
+}
+function revealNotebookTranslation(el) {
+  if (!el) return;
+
+  clearTimeout(el._hideTimer);
+
+  el.classList.add("revealed");
+
+  el._hideTimer = setTimeout(() => {
+    el.classList.remove("revealed");
+  }, 2000);
+}
+function getDefaultGeneratedStory() {
+  return {
+    title: "我的一天",
+    sentences: [
+      {
+        hanzi: "今天我很开心。",
+        hanzi_traditional: "今天我很開心。",
+        pinying: "jīntiān wǒ hěn kāixīn.",
+        polish_translation: "Dzisiaj jestem bardzo szczęśliwy."
+      },
+      {
+        hanzi: "我学习中文。",
+        hanzi_traditional: "我學習中文。",
+        pinying: "wǒ xuéxí zhōngwén.",
+        polish_translation: "Uczę się chińskiego."
+      },
+      {
+        hanzi: "晚上我喝茶。",
+        hanzi_traditional: "晚上我喝茶。",
+        pinying: "wǎnshang wǒ hē chá.",
+        polish_translation: "Wieczorem piję herbatę."
+      }
+    ]
+  };
 }
 (async function init() {
   await Promise.all([
@@ -3157,6 +3427,51 @@ function updateActiveBottomButtons() {
           pl_translations: ["szary"]
         }
       ]);
+
+      saveCustomWords([
+        {
+          hanzi: "你好",
+          hanzi_traditional: "你好",
+          translation_pl: "cześć"
+        },
+        {
+          hanzi: "谢谢",
+          hanzi_traditional: "謝謝",
+          translation_pl: "dziękuję"
+        },
+        {
+          hanzi: "没关系",
+          hanzi_traditional: "沒關係",
+          translation_pl: "nie ma problemu"
+        },
+        {
+          hanzi: "可以",
+          hanzi_traditional: "可以",
+          translation_pl: "można"
+        },
+        {
+          hanzi: "喜欢",
+          hanzi_traditional: "喜歡",
+          translation_pl: "lubić"
+        },
+        {
+          hanzi: "今天",
+          hanzi_traditional: "今天",
+          translation_pl: "dzisiaj"
+        },
+        {
+          hanzi: "明天",
+          hanzi_traditional: "明天",
+          translation_pl: "jutro"
+        },
+        {
+          hanzi: "中国人",
+          hanzi_traditional: "中國人",
+          translation_pl: "Chińczyk"
+        }
+      ]);
+
+      saveGeneratedStory(getDefaultGeneratedStory())
     }
   }
   router();
