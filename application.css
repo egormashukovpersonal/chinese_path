@@ -239,7 +239,7 @@ button.locked {
 }
 #speak-mute-btn {
   background: none !important;
-  width: 15.5%;
+  width: 13.1%;
   border: none !important;
   font-size: 70px;
 }
@@ -248,11 +248,11 @@ button.locked {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 .dev-toggle {
   background: none;
-  width: 15.5%;
+  width: 13.1%;
   border: none !important;
   font-size: 100px;
 }
@@ -276,7 +276,7 @@ button.locked {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 
 #srs-calendar h1 {
@@ -305,7 +305,7 @@ button.locked {
 }
 
 .srs-size-btn {
-  width: 15.5%;
+  width: 13.1%;
   background: none !important;
   border: none;
   font-size: 70px;
@@ -500,14 +500,14 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
   border-radius: 20px;
 }
 .traditional-toggle {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
   border-radius: 20px;
 }
 
@@ -577,13 +577,13 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 #notebook-btn {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 #notebook-list {
   padding-bottom: 500px;
@@ -592,14 +592,14 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 
 #srs-btn {
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 
 .generate-btn {
@@ -611,7 +611,7 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 #generated-list {
   padding-bottom: 500px;
@@ -715,7 +715,7 @@ button.completed .level-number{
   border: none !important;
   font-size: 70px;
   background: none;
-  width: 15.5%;
+  width: 13.1%;
 }
 
 #phonetics-list {
@@ -912,4 +912,16 @@ button.completed .level-number{
   font-size: 55px;
   cursor: pointer;
   color: gray;
+}
+.translation-toggle {
+  border: none !important;
+  font-size: 70px;
+  background: none;
+  width: 13.1%;
+}
+
+.preview-translation {
+  font-size: 40px;
+  margin-top: 10px;
+  position: relative;
 }
