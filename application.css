@@ -923,5 +923,5 @@ button.completed .level-number{
 .preview-translation {
   font-size: 40px;
   margin-top: 10px;
-  position: relative;
+  position: absolute;
 }
