@@ -1,6 +1,7 @@
 body {
   margin: 0;
   padding: 32px;
+  padding-bottom: env(safe-area-inset-bottom);
   background: #212121;
   font-family: system-ui, sans-serif;
   color: #fff;
@@ -10,6 +11,8 @@ html, body {
   overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;
+  overflow-x: hidden;
+  overscroll-behavior: none;
 }
 .section,
 .example-section,
@@ -924,7 +927,7 @@ button.completed .level-number{
 }
 
 .preview-translation {
-  font-size: 40px;
+  font-size: 35px;
   position: absolute;
   bottom: 5px;
   left: 2px;

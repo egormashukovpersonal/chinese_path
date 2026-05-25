@@ -1957,7 +1957,7 @@ function getShortestTranslation(c) {
 
     .filter(Boolean)
 
-    // убираем мусор типа "(formal)"
+    // remove "(formal)" etc
     .map(x =>
       x.replace(/\(.*?\)/g, "").trim()
     )
@@ -1968,7 +1968,7 @@ function getShortestTranslation(c) {
     return "";
   }
 
-  return values.sort((a, b) => {
+  const sorted = values.sort((a, b) => {
     const aScore =
       a.length + a.split(" ").length * 10;
 
@@ -1976,7 +1976,12 @@ function getShortestTranslation(c) {
       b.length + b.split(" ").length * 10;
 
     return aScore - bScore;
-  })[0];
+  });
+
+  const result =
+    sorted[0] || "";
+
+  return result.slice(0, 7);
 }
 function getHanziPreviewForLevel(level) {
   var usePinyin =
