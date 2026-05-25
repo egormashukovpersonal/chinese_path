@@ -353,8 +353,8 @@ h1 {
   position: fixed;
   width: 100%;
   background: #212121;
-  z-index: 99;
-  bottom: -1px;
+  z-index: 999;
+  bottom: -10px;
   left: 0px;
   padding-bottom: 50px;
   padding-top: 20px;

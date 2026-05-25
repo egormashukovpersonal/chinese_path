@@ -1004,7 +1004,7 @@ function renderPhoneticsList() {
             ')"' +
           '>' +
 
-            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi), getShortestTranslation(char)) +
+            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
             '<div ' +
               'class="phonetic-char-pinyin preview-pinyin" ' +
@@ -1037,7 +1037,7 @@ function renderPhoneticsList() {
             'onclick="togglePhoneticGroup(' + groupIndex + ')"' +
           '>' +
 
-            renderDualHanzi(renderToneColoredHanzi(group.phonetic), renderToneColoredHanzi(group.phonetic_traditional || group.phonetic), getShortestTranslation(group)) +
+            renderDualHanzi(renderToneColoredHanzi(group.phonetic), renderToneColoredHanzi(group.phonetic_traditional || group.phonetic)) +
 
             '<div ' +
               'class="phonetic-char-pinyin preview-pinyin" ' +
@@ -1118,7 +1118,7 @@ function togglePhoneticCharDetails(groupIndex, charIndex) {
 
             '<div class="phonetic-detail-hanzi" onclick="speak(\'' + char.hanzi + '\')">' +
 
-              renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi), getShortestTranslation(char)) +
+              renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
               '<div class="phonetic-detail-pinyin">' +
 
@@ -1243,7 +1243,7 @@ function renderComponentsList() {
               groupIndex + ', ' + charIndex +
             ')"' +
           '>' +
-            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi), getShortestTranslation(char)) +
+            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
@@ -1272,7 +1272,7 @@ function renderComponentsList() {
             'class="component-char component-char-main" ' +
             'onclick="toggleComponentGroup(' + groupIndex + ')"' +
           '>' +
-            renderDualHanzi(renderToneColoredHanzi(group.component), renderToneColoredHanzi(group.component_traditional || group.component), getShortestTranslation(group)) +
+            renderDualHanzi(renderToneColoredHanzi(group.component), renderToneColoredHanzi(group.component_traditional || group.component)) +
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
@@ -1376,7 +1376,7 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
         '<div class="component-char-wrapper">' +
           '<div class="component-char">' +
             '<div class="component-detail-hanzi" onclick="speak(\'' + char.hanzi + '\')">' +
-              renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi), getShortestTranslation(char)) +
+              renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
 
               '<div class="component-detail-pinyin">' +
                 renderToneColoredPinyin(
@@ -2723,7 +2723,7 @@ function renderHomoList() {
           <div class="homo-values">
             ${index[key].map(v => `
               <span class="homo-val" onclick="speak('${v.hanzi}')">
-                ${renderDualHanzi(renderToneColoredHanzi(v.hanzi), renderToneColoredHanzi(v.hanzi_traditional || v.hanzi), getShortestTranslation(v))} &nbsp;(${v.pinyin})
+                ${renderDualHanzi(renderToneColoredHanzi(v.hanzi), renderToneColoredHanzi(v.hanzi_traditional || v.hanzi))} &nbsp;(${v.pinyin})
               </span>
             `).join("")}
           </div>
@@ -3047,7 +3047,7 @@ function renderExamplesList() {
             class="example-hanzi"
             onclick="event.stopPropagation(); speak('${c.example_hanzi}')"
           >
-            ${renderDualHanzi(renderToneColoredHanzi(с.example_hanzi), renderToneColoredHanzi(с.example_hanzi_traditional || с.example_hanzi), getShortestTranslation(c))}
+            ${renderDualHanzi(renderToneColoredHanzi(с.example_hanzi), renderToneColoredHanzi(с.example_hanzi_traditional || с.example_hanzi))}
           </div>
 
           <div class="example-arrow" id="example-arrow-${index}">
