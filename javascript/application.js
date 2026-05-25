@@ -1004,7 +1004,7 @@ function renderPhoneticsList() {
             ')"' +
           '>' +
 
-            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
+            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi), getShortestTranslation(char), char.hanzi) +
 
             '<div ' +
               'class="phonetic-char-pinyin preview-pinyin" ' +
@@ -1243,7 +1243,7 @@ function renderComponentsList() {
               groupIndex + ', ' + charIndex +
             ')"' +
           '>' +
-            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi)) +
+            renderDualHanzi(renderToneColoredHanzi(char.hanzi), renderToneColoredHanzi(char.hanzi_traditional || char.hanzi), getShortestTranslation(char), char.hanzi) +
 
             '<div ' +
               'class="component-char-pinyin preview-pinyin" ' +
@@ -1412,7 +1412,8 @@ function toggleComponentCharDetails(groupIndex, charIndex) {
 function renderDualHanzi(
   simple,
   traditional,
-  translation = ""
+  translation = "",
+  hanzi = ""
 ) {
   const cleanSimple =
     String(simple)
@@ -1426,6 +1427,9 @@ function renderDualHanzi(
 
   const hasDifference =
     cleanSimple !== cleanTraditional;
+
+  const pinyin = getCharPinyin(hanzi);
+  const tone = detectTone(pinyin);
 
   return `
     <div class="hanzi-simple ${
@@ -1445,7 +1449,7 @@ function renderDualHanzi(
     </div>
 
     <div
-      class="preview-translation"
+      class="preview-translation tone-${tone}"
       style="display:${
         localStorage.getItem("useTranslationPreview") === "true"
           ? ""
@@ -1521,7 +1525,7 @@ function renderCustomHanziList() {
           '>' +
 
             '<span class="custom-hanzi-main">' +
-              renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi), getShortestTranslation(c)) +
+              renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi), getShortestTranslation(c), c.hanzi) +
             '</span>' +
 
             '<span ' +
@@ -1943,16 +1947,36 @@ function getShortestTranslation(c) {
     ...(c.translations || []),
   ]
     .filter(Boolean)
-    .map(x => String(x).trim())
+
+    .flatMap(x =>
+      String(x)
+        .split(/[,/;·]/g)
+    )
+
+    .map(x => x.trim())
+
+    .filter(Boolean)
+
+    // убираем мусор типа "(formal)"
+    .map(x =>
+      x.replace(/\(.*?\)/g, "").trim()
+    )
+
     .filter(Boolean);
 
   if (!values.length) {
     return "";
   }
 
-  return values.sort(
-    (a, b) => a.length - b.length
-  )[0];
+  return values.sort((a, b) => {
+    const aScore =
+      a.length + a.split(" ").length * 10;
+
+    const bScore =
+      b.length + b.split(" ").length * 10;
+
+    return aScore - bScore;
+  })[0];
 }
 function getHanziPreviewForLevel(level) {
   var usePinyin =
@@ -1969,7 +1993,7 @@ function getHanziPreviewForLevel(level) {
       '<div>' +
 
         '<div>' +
-          renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi), getShortestTranslation(c)) +
+          renderDualHanzi(renderToneColoredHanzi(c.hanzi), renderToneColoredHanzi(c.hanzi_traditional || c.hanzi), getShortestTranslation(c), c.hanzi) +
         '</div>' +
 
         '<div ' +

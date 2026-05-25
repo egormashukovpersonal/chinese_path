@@ -71,6 +71,7 @@ html, body {
   border-radius: 0px;
   height: auto;
   padding: 0;
+  position: relative;
 }
 .cell hr {
   border: 1px solid black;
@@ -449,6 +450,7 @@ button.completed .level-number{
   font-size: 130px;
   font-weight: 500;
   line-height: 5rem;
+  position: relative;
 }
 
 .custom-hanzi-main {
@@ -757,6 +759,7 @@ button.completed .level-number{
   font-size: 130px;
   font-weight: 500;
   line-height: 5rem;
+  position: relative;
 }
 
 .phonetic-group-chars {
@@ -922,6 +925,7 @@ button.completed .level-number{
 
 .preview-translation {
   font-size: 40px;
-  margin-top: 10px;
   position: absolute;
+  bottom: 5px;
+  left: 2px;
 }
