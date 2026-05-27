@@ -152,7 +152,7 @@ function getGeneratedStory() {
 }
 function buildStoryPrompt() {
   return `
-Generate a coherent Chinese story for HSK1-3 learners.
+Generate a coherent Chinese story for Chinese learners. Not very silly, please. random.
 
 STRICT JSON ONLY.
 
