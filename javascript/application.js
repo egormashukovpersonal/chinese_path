@@ -152,7 +152,11 @@ function getGeneratedStory() {
 }
 function buildStoryPrompt() {
   return `
-Generate a coherent Chinese story for Chinese learners. Not very silly, please. random.
+Give me chinese text.
+I want Chinese text that use simple language but discuss adult and meaningful topics.
+Avoid childish examples like cats, apples, or classroom dialogues.
+The text should feel atmospheric, modern, or thoughtful — about cities, technology, loneliness, work, cinema, rain, trains, the internet, or everyday life.
+Keep the sentences short and readable, but emotionally or intellectually engaging.
 
 STRICT JSON ONLY.
 
@@ -172,9 +176,6 @@ Format:
 
 Rules:
 - 10-20 connected sentences
-- very natural
-- not complex grammar
-- mostly HSK1-3 vocabulary
 - story should be coherent and interesting
 - short sentences
 - no markdown
