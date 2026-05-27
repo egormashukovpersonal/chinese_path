@@ -2887,7 +2887,7 @@ function buildHomophoneIndex() {
     const parts = splitHanziAndPinyin(entry.hanzi, entry.pinyin);
 
     parts.forEach(({ hanzi, pinyin }, i) => {
-      const key = normalizePinyin(pinyin);
+      const key = normalizePinyin(pinyin || '');
 
       if (!index[key]) {
         index[key] = [];
@@ -3088,6 +3088,10 @@ function renderExamplesList() {
 
         <div class="example-details" id="example-details-${index}">
           <div class="example-pl">
+            ${c.pinying || ""}
+          </div>
+
+          <div class="example-pl">
             ${c.example_pl || c.example_ru || ""}
           </div>
         </div>
@@ -3195,6 +3199,9 @@ function renderGeneratedList() {
                 class="example-details"
                 id="example-details-${index}"
               >
+                <div class="example-pl">
+                  ${c.pinying || ""}
+                </div>
                 <div class="example-pl">
                   ${c.polish_translation || ""}
                 </div>
