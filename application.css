@@ -466,6 +466,7 @@ button.completed .level-number{
 .preview-pinyin {
   font-size: 55px;
   margin-top: -5px;
+  word-break: break-all;
 }
 
 .custom-hanzi-input-btn {

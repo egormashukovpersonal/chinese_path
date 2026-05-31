@@ -3381,7 +3381,7 @@ function getDefaultGeneratedStory() {
           custom: true,
           hsk: 1,
           hanzi: "妈",
-          pinyin: "mā",
+          pinyin: "māmā māmā",
           translations: ["mom"],
           ru_translations: ["мама"],
           pl_translations: ["mama"]
@@ -3391,7 +3391,7 @@ function getDefaultGeneratedStory() {
           custom: true,
           hsk: 1,
           hanzi: "麻",
-          pinyin: "má",
+          pinyin: "mámámámá",
           translations: ["hemp"],
           ru_translations: ["конопля"],
           pl_translations: ["konopie"]
