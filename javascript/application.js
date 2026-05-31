@@ -2194,7 +2194,9 @@ function renderCustomChar(index = 0) {
     if (exampleOpenClicks == 1) {
       examplePinying.style.visibility = "visible";
       examplePl.style.visibility = "visible";
-      exampleHsk.style.visibility = "visible";
+      if (exampleHsk) {
+        exampleHsk.style.visibility = "visible";
+      }
       openExampleBtn.style.display = 'none';
       toggleBtn.click()
       toggleBtn.click()
@@ -2351,7 +2353,9 @@ function renderLevel(level, index = 0) {
     if (exampleOpenClicks == 1) {
       examplePinying.style.visibility = "visible";
       examplePl.style.visibility = "visible";
-      exampleHsk.style.visibility = "visible";
+      if (exampleHsk) {
+        exampleHsk.style.visibility = "visible";
+      }
       openExampleBtn.style.display = 'none'
       toggleBtn.click()
       toggleBtn.click()
@@ -2605,7 +2609,9 @@ function renderSrs() {
     if (exampleOpenClicks == 1) {
       examplePinying.style.visibility = "visible";
       examplePl.style.visibility = "visible";
-      exampleHsk.style.visibility = "visible";
+      if (exampleHsk) {
+        exampleHsk.style.visibility = "visible";
+      }
       openExampleBtn.style.display = 'none'
       toggleBtn.click()
       toggleBtn.click()
