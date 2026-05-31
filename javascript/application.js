@@ -2344,7 +2344,7 @@ function renderLevel(level, index = 0) {
   const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0
 
-  document.addEventListener("click", (e) => {
+  openExampleBtn.onclick = (e) => {
     if (!e.target || e.target.id !== "open-all-desc-btn") return;
 
     exampleOpenClicks++;
@@ -2358,7 +2358,7 @@ function renderLevel(level, index = 0) {
     };
     // if (exampleOpenClicks == 2) {
     // }
-  });
+  };
 
   incrementalRevealBtn.click();
 }
@@ -2598,7 +2598,7 @@ function renderSrs() {
   const exampleHsk = document.getElementById("example-p-hsk");
   let exampleOpenClicks = 0
 
-  document.addEventListener("click", (e) => {
+  openExampleBtn.onclick = (e) => {
     if (!e.target || e.target.id !== "open-all-desc-btn") return;
 
     exampleOpenClicks++;
@@ -2612,7 +2612,7 @@ function renderSrs() {
     };
     if (exampleOpenClicks == 2) {
     }
-  });
+  };
 
   incrementalRevealBtn.click();
 }
